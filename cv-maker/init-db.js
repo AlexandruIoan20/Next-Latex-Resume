@@ -138,5 +138,14 @@ db.exec(`
   );
 `);
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS sessions (
+    id TEXT PRIMARY KEY,
+    userId INTEGER NOT NULL,
+    expiresAt INTEGER NOT NULL,
+    FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+  );
+`);
+
 console.log('Database created successfully: cv_database.db');
 db.close();
