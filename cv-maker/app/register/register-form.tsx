@@ -4,8 +4,6 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { addUser } from "./actions"
-import { getCurrentUser } from "@/lib/auth";
-import { redirect } from "next/navigation"
 
 // Componentele Shadcn
 import { Button } from "@/components/ui/button"

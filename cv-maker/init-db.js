@@ -20,7 +20,6 @@ db.exec(`
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     userId INTEGER NOT NULL,
     title TEXT DEFAULT 'New CV',
-    template TEXT DEFAULT 'classic',
     description TEXT,
     FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
   );
@@ -45,7 +44,7 @@ db.exec(`
   );
 `);
 
-// 4. Experiences (Cu sortOrder)
+// 4. Experiences
 db.exec(`
   CREATE TABLE IF NOT EXISTS experiences (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
