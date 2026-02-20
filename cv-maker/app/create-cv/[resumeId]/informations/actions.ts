@@ -10,8 +10,8 @@ const experienceSchema = z.array(z.object({
     title: z.string().min(1, "Title is required"),
     city: z.string().min(1, "City is required"),
     employer: z.string().min(1, "Employer is required"),
-    startDate: z.coerce.date().refine(date => date <= new Date(), "Start date cannot be in the future").optional(), 
-    finishDate: z.coerce.date().refine(date => date <= new Date(), "Finish date cannot be in the future").optional(),
+    startDate: z.coerce.date().refine(date => date <= new Date(), "Start date cannot be in the future").optional().nullable(), 
+    finishDate: z.coerce.date().refine(date => date <= new Date(), "Finish date cannot be in the future").optional().nullable(),
     description: z.string()
 }));
 
@@ -22,12 +22,18 @@ export async function getExperiences(resumeId: number): Promise<Experience[]> {
     let parsedExperiences: Experience[] = [];
     for(const exp of experiences) {
         try {
+            let startDate, finishDate; 
+            if(exp.finishDate === "Present") finishDate = null;
+            else if(exp.finishDate) finishDate = fromSqlDate(exp.finishDate);
+
+            if(exp.startDate) startDate = fromSqlDate(exp.startDate);
+            else startDate = undefined;
             const parsed = experienceSchema.parse([{
                 title: exp.title,
                 city: exp.city,
                 employer: exp.employer,
-                startDate: exp.startDate ? fromSqlDate(exp.startDate) : undefined,
-                finishDate: exp.finishDate ? fromSqlDate(exp.finishDate) : undefined,
+                startDate, 
+                finishDate,
                 description: exp.description || ""
             }])[0] as Experience;
             parsedExperiences.push(parsed);
@@ -45,7 +51,7 @@ export async function addExperiences(formData: FormData, resumeId: number) {
     if(!experiencesString) return { success: false, message: "No experiences data provided." };
 
     try { 
-        const rawJson = JSON.parse(experiencesString);
+        let rawJson = JSON.parse(experiencesString);
         const validation = experienceSchema.safeParse(rawJson);
         console.log("Raw experiences data:", rawJson);
         console.log("Validation result:", validation.success);
@@ -54,7 +60,7 @@ export async function addExperiences(formData: FormData, resumeId: number) {
             return { success: false, message: "Invalid experiences data." };
         }
 
-        const experiencesArray = validation.data;
+        const experiencesArray = validation.data; 
         console.log("Validated experiences data:", experiencesArray);
         const deleteOld = db.prepare(`DELETE FROM experiences WHERE resumeId = ?`);
         const insertNew = db.prepare(`INSERT INTO experiences (resumeId, title, city, employer, startDate, finishDate, description) VALUES (?, ?, ?, ?, ?, ?, ?)`);
@@ -62,13 +68,20 @@ export async function addExperiences(formData: FormData, resumeId: number) {
         const runTransaction = db.transaction((data) => { 
             deleteOld.run(resumeId);
             for(const exp of data) {
+                let startDate, finishDate; 
+                if(exp.finishDate === null) finishDate = "Present"; 
+                else if(exp.finishDate) finishDate = toSqlDate(exp.finishDate);
+
+                if(exp.startDate) startDate = toSqlDate(exp.startDate);
+                else startDate = null;
+
                 insertNew.run(
                     resumeId,
                     exp.title,
                     exp.city,
                     exp.employer,
-                    exp.startDate ? toSqlDate(exp.startDate) : null,
-                    exp.finishDate ? toSqlDate(exp.finishDate) : null,
+                    startDate, 
+                    finishDate,
                     exp.description
                 );
             }

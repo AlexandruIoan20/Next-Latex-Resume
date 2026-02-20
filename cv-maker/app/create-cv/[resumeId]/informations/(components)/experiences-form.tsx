@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { format } from "date-fns"
 import { Plus, Trash2, Briefcase, Calendar as CalendarIcon } from "lucide-react"
+import { UpdatedDatePicker } from "@/components/ui/updated-date-picker"
 import { cn } from "@/lib/utils"
 import { useState } from "react"
 
@@ -46,8 +47,8 @@ export const experienceSchema = z.object({
       title: z.string().min(1, "Title is required"),
       city: z.string().min(1, "City is required"),
       employer: z.string().min(1, "Employer is required"),
-      startDate: z.date().optional(), 
-      finishDate: z.date().optional(), 
+      startDate: z.date().optional().nullable(), 
+      finishDate: z.date().optional().nullable(), 
       description: z.string().optional(), 
     })
   ),
@@ -144,7 +145,6 @@ return (
                         </Button>
                       </CollapsibleTrigger>
 
-                      {/* 🗑 delete */}
                       <Button
                         type="button"
                         variant="ghost"
@@ -207,22 +207,18 @@ return (
                           name={`experiences.${index}.startDate`}
                           render={({ field }) => (
                             <FormItem className="flex flex-col">
-                              <FormLabel className="text-zinc-400 text-xs uppercase tracking-wider">Start Date</FormLabel>
-                              <Popover>
-                                <PopoverTrigger asChild>
+                                  <FormLabel className="text-zinc-400 text-xs uppercase tracking-wider">
+                                    Start Date
+                                  </FormLabel>
                                   <FormControl>
-                                    <Button variant="outline" className={cn("w-full pl-3 text-left font-normal text-zinc-300 bg-zinc-950 border-zinc-800", !field.value && "text-zinc-500")}>
-                                      {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                    </Button>
+                                    <UpdatedDatePicker
+                                      mode = "start"
+                                      value={field.value}
+                                      onChange={field.onChange}
+                                    />
                                   </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0 bg-zinc-900 border-zinc-800" align="start">
-                                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date > new Date()} initialFocus />
-                                </PopoverContent>
-                              </Popover>
-                              <FormMessage />
-                            </FormItem>
+                                  <FormMessage />
+                              </FormItem>
                           )}
                         />
                         <FormField
@@ -230,22 +226,19 @@ return (
                           name={`experiences.${index}.finishDate`}
                           render={({ field }) => (
                             <FormItem className="flex flex-col">
-                              <FormLabel className="text-zinc-400 text-xs uppercase tracking-wider">Finish Date</FormLabel>
-                              <Popover>
-                                <PopoverTrigger asChild>
+                                  <FormLabel className="text-zinc-400 text-xs uppercase tracking-wider">
+                                    Finish Date
+                                  </FormLabel>
                                   <FormControl>
-                                    <Button variant="outline" className={cn("w-full pl-3 text-left font-normal text-zinc-300 bg-zinc-950 border-zinc-800", !field.value && "text-zinc-500")}>
-                                      {field.value ? format(field.value, "PPP") : <span>Present / Pick date</span>}
-                                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                    </Button>
+                                    <UpdatedDatePicker
+                                      mode = "finish"
+                                      value={field.value}
+                                      onChange={field.onChange}
+                                      placeholder="Present / Pick date"
+                                    />
                                   </FormControl>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0 bg-zinc-900 border-zinc-800" align="start">
-                                  <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date > new Date()} initialFocus />
-                                </PopoverContent>
-                              </Popover>
-                              <FormMessage />
-                            </FormItem>
+                                  <FormMessage />
+                              </FormItem>
                           )}
                         />
                       </div>
