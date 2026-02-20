@@ -4,7 +4,7 @@ import { useFieldArray, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { format } from "date-fns"
-import { Plus, Trash2, Briefcase, Calendar as CalendarIcon, ChevronDown } from "lucide-react"
+import { Plus, Trash2, Briefcase, Calendar as CalendarIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 import { Button } from "@/components/ui/button"
@@ -22,22 +22,40 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-import { experienceSchema } from "../schemas"
 import { addExperiences } from "../actions"
+import { Experience } from "@/types"
 
-export default function ExperiencesForm({ resumeId }: { resumeId: number }) { 
-    console.log("ExperiencesForm rendered with resumeId:", resumeId);
+interface ExperiencesFormProps {
+    resumeId: number;
+    previousExperience: Experience[];
+}
+
+export const experienceSchema = z.object({
+  experiences: z.array(
+    z.object({
+      id: z.number().optional(),
+      resumeId: z.number().optional(),
+      title: z.string().min(1, "Title is required"),
+      city: z.string().min(1, "City is required"),
+      employer: z.string().min(1, "Employer is required"),
+      startDate: z.date().optional(), 
+      finishDate: z.date().optional(), 
+      description: z.string().optional(), 
+    })
+  ),
+});
+export default function ExperiencesForm({ resumeId, previousExperience }: ExperiencesFormProps) { 
     const form = useForm<z.infer<typeof experienceSchema>>({
-        resolver: zodResolver(experienceSchema),
-        defaultValues: {
-            experiences: []
-        }
+      resolver: zodResolver(experienceSchema),
+      defaultValues: {
+          experiences: previousExperience as z.infer<typeof experienceSchema>["experiences"]
+      }
     });
 
     const { fields, append, remove } = useFieldArray({ 
         control: form.control, 
         name: "experiences"
-    }); 
+    });
 
     const onSubmit = async (data: z.infer<typeof experienceSchema>) => {
         console.log({ resumeId })

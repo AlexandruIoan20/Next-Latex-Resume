@@ -3,7 +3,8 @@
 import db from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import * as z from "zod";
-import { toSqlDate } from "@/lib/dateTransformer";
+import { toSqlDate, fromSqlDate } from "@/lib/dateTransformer";
+import { BackendExperience, Experience } from "@/types";
 
 const experienceSchema = z.array(z.object({
     title: z.string().min(1, "Title is required"),
@@ -14,6 +15,29 @@ const experienceSchema = z.array(z.object({
     description: z.string()
 }));
 
+export async function getExperiences(resumeId: number): Promise<Experience[]> {
+    const statement = db.prepare("SELECT * FROM experiences WHERE resumeId = ?");
+    let experiences: BackendExperience[] = statement.all(resumeId) as BackendExperience[]; 
+
+    let parsedExperiences: Experience[] = [];
+    for(const exp of experiences) {
+        try {
+            const parsed = experienceSchema.parse([{
+                title: exp.title,
+                city: exp.city,
+                employer: exp.employer,
+                startDate: exp.startDate ? fromSqlDate(exp.startDate) : undefined,
+                finishDate: exp.finishDate ? fromSqlDate(exp.finishDate) : undefined,
+                description: exp.description || ""
+            }])[0] as Experience;
+            parsedExperiences.push(parsed);
+        } catch(error) {
+            console.error(`Error parsing experience with id ${exp.id}:`, error);
+        }
+    }
+
+    return parsedExperiences;
+}
 export async function addExperiences(formData: FormData, resumeId: number) {
     console.log("Adding experiences for resumeId:", resumeId);
     const experiencesString = formData.get("experiences") as string;

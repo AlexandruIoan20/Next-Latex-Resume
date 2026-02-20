@@ -1,10 +1,16 @@
 "use client"; 
 
 import ExperiencesForm from "./experiences-form";
+import { Experience } from "@/types";
 
-export default function FormsList ({ resumeId}: { resumeId: number }) { 
+interface FormsListProps {
+    resumeId: number;
+    previousExperience: Experience[];
+}
+
+export default function FormsList ({ resumeId, previousExperience }: FormsListProps) { 
     console.log("FormsList rendered with resumeId:", resumeId);
     return ( 
-        <ExperiencesForm resumeId = { resumeId } />
+        <ExperiencesForm resumeId = { resumeId } previousExperience = { previousExperience } />
     )
 }
