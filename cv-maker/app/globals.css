@@ -116,6 +116,35 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
+/* 🔥 tiptap dark styles */
+
+.rich-editor ul {
+  list-style-type: disc !important;
+  padding-left: 1.25rem;
+}
+
+.rich-editor ol {
+  list-style-type: decimal !important;
+  padding-left: 1.25rem;
+}
+
+.rich-editor p {
+  margin: 0.25rem 0;
+}
+
+.rich-editor strong {
+  color: white;
+}
+
+.rich-editor em {
+  color: #d4d4d8;
+}
+
+/* selectie text violet */
+.rich-editor ::selection {
+  background: rgba(139, 92, 246, 0.35);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
