@@ -60,3 +60,21 @@ export type Project = {
   sortOrder: number; 
 }
 
+export type BackendCourse = { 
+  id: number; 
+  resumeId: number; 
+  title: string; 
+  institution: string; 
+  startDate: string | undefined; 
+  finishDate: string | undefined; 
+}
+
+export type Course = { 
+  id: number; 
+  resumeId: number; 
+  title: string; 
+  institution: string; 
+  startDate: Date | undefined; 
+  finishDate: Date | undefined; 
+}
+

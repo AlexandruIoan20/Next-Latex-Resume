@@ -4,7 +4,7 @@ import db from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import * as z from "zod";
 import { toSqlDate, fromSqlDate } from "@/lib/dateTransformer";
-import { BackendEducation, BackendExperience, Education, Experience, Project } from "@/types";
+import { BackendEducation, BackendExperience, Education, Experience, Project, BackendCourse, Course} from "@/types";
 
 const experienceSchema = z.array(z.object({
     title: z.string().min(1, "Title is required"),
@@ -34,6 +34,17 @@ const projectSchema = z.array(
         description: z.string(), 
         link: z.string(), 
         techStack: z.string(), 
+    })
+); 
+
+const courseSchema = z.array(
+    z.object({ 
+        id: z.number().optional(),
+        resumeId: z.number().optional(),
+        title: z.string().min(1, "Title is required"),
+        institution: z.string().min(1, "Institution is required"),
+        startDate: z.coerce.date().refine(date => date <= new Date(), "Start date cannot be in the future").optional().nullable(), 
+        finishDate: z.coerce.date().refine(date => date <= new Date(), "Finish date cannot be in the future").optional().nullable(),
     })
 ); 
 
@@ -268,6 +279,98 @@ export async function addProject(formData: FormData, resumeId: number) {
         return { 
             success: false, 
             message: "An error occured while adding projects."
+        }
+    }
+}
+
+export async function getCourses(resumeId: number): Promise<Course[]> {
+    const statement = db.prepare("SELECT * FROM courses WHERE resumeId = ?");
+    let courses: BackendCourse[] = statement.all(resumeId) as BackendCourse[]; 
+
+    let parsedCourses: Course[] = [];
+    for(const course of courses) {
+        try {
+            let startDate, finishDate; 
+            if(course.finishDate === "Present") finishDate = null;
+            else if(course.finishDate) finishDate = fromSqlDate(course.finishDate);
+
+            if(course.startDate) startDate = fromSqlDate(course.startDate);
+            else startDate = undefined;
+            
+            const parsed = courseSchema.parse([{
+                title: course.title,
+                institution: course.institution,
+                startDate, 
+                finishDate
+            }])[0] as Course;
+            
+            parsedCourses.push(parsed);
+        } catch(error) {
+            console.error(`Error parsing course with id ${course.id}:`, error);
+        }
+    }
+
+    return parsedCourses;
+}
+
+export async function addCourses(formData: FormData, resumeId: number) {
+    console.log("Adding courses for resumeId:", resumeId);
+    const coursesString = formData.get("courses") as string;
+    console.log("Received courses string:", coursesString);
+    
+    if(!coursesString) return { success: false, message: "No courses data provided." };
+
+    try { 
+        let rawJson = JSON.parse(coursesString);
+        const validation = courseSchema.safeParse(rawJson);
+        
+        console.log("Raw courses data:", rawJson);
+        console.log("Validation result:", validation.success);
+        
+        if(!validation.success) {
+            console.error("Validation errors:", validation.error.format());
+            return { success: false, message: "Invalid courses data." };
+        }
+
+        const coursesArray = validation.data; 
+        console.log("Validated courses data:", coursesArray);
+        
+        const deleteOld = db.prepare(`DELETE FROM courses WHERE resumeId = ?`);
+        const insertNew = db.prepare(`INSERT INTO courses (resumeId, title, institution, startDate, finishDate) VALUES (?, ?, ?, ?, ?)`);
+
+        const runTransaction = db.transaction((data) => { 
+            deleteOld.run(resumeId);
+            for(const course of data) {
+                let startDate, finishDate; 
+                if(course.finishDate === null) finishDate = "Present"; 
+                else if(course.finishDate) finishDate = toSqlDate(course.finishDate);
+
+                if(course.startDate) startDate = toSqlDate(course.startDate);
+                else startDate = null;
+
+                insertNew.run(
+                    resumeId,
+                    course.title,
+                    course.institution,
+                    startDate, 
+                    finishDate
+                );
+            }
+        }); 
+
+        runTransaction(coursesArray);
+
+        console.log(`Courses added successfully for resumeId ${resumeId}!`);
+        revalidatePath(`/create-cv/${resumeId}/informations`);
+        return {
+            success: true,
+            message: "Courses added successfully!"
+        }
+    } catch(error) { 
+        console.error("Error adding courses:", error);
+        return {
+            success: false,
+            message: "An error occurred while adding courses."
         }
     }
 }
