@@ -1,8 +1,8 @@
 import FormsList from "./(components)/forms-list";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getExperiences, getEducation, getProjects, getCourses, getLanguages } from "./actions";
-import { Course, Education, Experience, Language, Project } from "@/types";
+import { getExperiences, getEducation, getProjects, getCourses, getLanguages, getInterests } from "./actions";
+import { Course, Education, Experience, Interest, Language, Project } from "@/types";
 
 interface PageProps { 
     params: Promise<{ resumeId: number }>;
@@ -20,6 +20,7 @@ export default async function InformationsPage ({ params }: PageProps) {
     const previousProjects: Project[] = await getProjects(resumeId); 
     const previousCourses: Course[] = await getCourses(resumeId); 
     const previousLanguages: Language[] = await getLanguages(resumeId); 
+    const previousInterests: Interest[] = await getInterests(resumeId); 
 
     console.log("InformationsPage rendered with resumeId:", resumeId);
 
@@ -32,6 +33,7 @@ export default async function InformationsPage ({ params }: PageProps) {
                 previousExperience = { previousExperience } 
                 previousEducation = { previousEducation } 
                 previousProjects = { previousProjects } 
+                previousInterests = { previousInterests }
             />
         </div>
     )

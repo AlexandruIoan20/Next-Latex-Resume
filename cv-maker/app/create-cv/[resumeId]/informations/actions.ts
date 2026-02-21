@@ -4,7 +4,7 @@ import db from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import * as z from "zod";
 import { toSqlDate, fromSqlDate } from "@/lib/dateTransformer";
-import { BackendEducation, BackendExperience, Education, Experience, Project, BackendCourse, Course, Language } from "@/types";
+import { BackendEducation, BackendExperience, Education, Experience, Project, BackendCourse, Course, Language, Interest } from "@/types";
 
 const experienceSchema = z.array(z.object({
     title: z.string().min(1, "Title is required"),
@@ -56,6 +56,15 @@ const languageSchema = z.array(
         level: z.enum(["A1", "A2", "B1", "B2", "C1", "C2"]),
     })
 ); 
+
+const interestSchema = z.array(
+    z.object({
+        id: z.number().optional(),
+        resumeId: z.number().optional(),
+        title: z.string().min(1, "Interest title is required"),
+    })
+)
+
 export async function getExperiences(resumeId: number): Promise<Experience[]> {
     const statement = db.prepare("SELECT * FROM experiences WHERE resumeId = ?");
     let experiences: BackendExperience[] = statement.all(resumeId) as BackendExperience[]; 
@@ -437,5 +446,63 @@ export async function addLanguages(formData: FormData, resumeId: number) {
             success: false,
             message: "An error occurred while adding languages."
         }
+    }
+}
+
+export async function getInterests(resumeId: number): Promise<Interest[]> {
+    // Interogare simplă, ordonată după sortOrder
+    const statement = db.prepare("SELECT * FROM interests WHERE resumeId = ? ORDER BY sortOrder ASC");
+    const interests = statement.all(resumeId) as Interest[]; 
+
+    return interests;
+}
+
+export async function addInterests(formData: FormData, resumeId: number) {
+    console.log("Adding interests for resumeId:", resumeId);
+    const interestsString = formData.get("interests") as string;
+    
+    if(!interestsString) return { success: false, message: "No interests data provided." };
+
+    try { 
+        let rawJson = JSON.parse(interestsString);
+        
+        // Ambalăm array-ul într-un obiect cu cheia "interests" pentru a respecta schema Zod
+        const validation = interestSchema.safeParse(rawJson);
+        
+        if(!validation.success) {
+            console.error("Validation errors:", validation.error.format());
+            return { success: false, message: "Invalid interests data." };
+        }
+
+        const interestsArray = validation.data; 
+        
+        const deleteOld = db.prepare(`DELETE FROM interests WHERE resumeId = ?`);
+        const insertNew = db.prepare(`INSERT INTO interests (resumeId, title) VALUES (?, ?)`);
+
+        const runTransaction = db.transaction((data) => { 
+            deleteOld.run(resumeId);
+            
+            for(const interest of data) {
+                insertNew.run(
+                    resumeId,
+                    interest.title,
+                );
+            }
+        }); 
+
+        runTransaction(interestsArray);
+
+        console.log(`Interests added successfully for resumeId ${resumeId}!`);
+        revalidatePath(`/create-cv/${resumeId}/informations`);
+        return {
+            success: true,
+            message: "Interests added successfully!"
+        };
+    } catch(error) { 
+        console.error("Error adding interests:", error);
+        return {
+            success: false,
+            message: "An error occurred while adding interests."
+        };
     }
 }
