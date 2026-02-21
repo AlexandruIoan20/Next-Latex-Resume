@@ -120,7 +120,7 @@ export default function ProjectForm({ resumeId, previousProjects }: ProjectFormP
                         name={`projects.${index}.techStack`}
                         render={({ field }) => (
                             <FormItem>
-                            <FormLabel className="text-zinc-400 text-xs uppercase tracking-wider">Description / Key Achievements</FormLabel>
+                            <FormLabel className="text-zinc-400 text-xs uppercase tracking-wider">Tech Stack</FormLabel>
                             <FormControl>
                                 <RichTextEditor
                                     value={field.value || ""}

@@ -238,6 +238,7 @@ export async function addProject(formData: FormData, resumeId: number) {
         }
 
         const projectsArray = validation.data; 
+        console.log({ projectsArray }); 
         const deleteOld = db.prepare(`DELETE FROM projects WHERE resumeId = ?`); 
         const insertNew = db.prepare(`INSERT INTO projects (resumeId, title, description, link, techStack) VALUES (?, ?, ?, ?, ?)`); 
 
@@ -247,7 +248,7 @@ export async function addProject(formData: FormData, resumeId: number) {
                 insertNew.run(
                     resumeId, 
                     p.title, 
-                    p.descriotion, 
+                    p.description, 
                     p.link, 
                     p.description
                 )   
