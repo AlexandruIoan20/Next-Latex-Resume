@@ -4,7 +4,7 @@ import db from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import * as z from "zod";
 import { toSqlDate, fromSqlDate } from "@/lib/dateTransformer";
-import { BackendEducation, BackendExperience, Education, Experience, Project, BackendCourse, Course, Language, Interest } from "@/types";
+import { BackendEducation, BackendExperience, Education, Experience, Project, BackendCourse, Course, Language, Interest, Ability } from "@/types";
 
 const experienceSchema = z.array(z.object({
     title: z.string().min(1, "Title is required"),
@@ -62,6 +62,15 @@ const interestSchema = z.array(
         id: z.number().optional(),
         resumeId: z.number().optional(),
         title: z.string().min(1, "Interest title is required"),
+    })
+)
+
+const abilitySchema = z.array(
+    z.object({ 
+        id: z.number().optional(),
+        resumeId: z.number().optional(),
+        title: z.string().min(1, "Ability title is required"),
+        level: z.enum(["0", "1", "2", "3", "4", "5", "6"]),
     })
 )
 
@@ -465,8 +474,6 @@ export async function addInterests(formData: FormData, resumeId: number) {
 
     try { 
         let rawJson = JSON.parse(interestsString);
-        
-        // Ambalăm array-ul într-un obiect cu cheia "interests" pentru a respecta schema Zod
         const validation = interestSchema.safeParse(rawJson);
         
         if(!validation.success) {
@@ -503,6 +510,63 @@ export async function addInterests(formData: FormData, resumeId: number) {
         return {
             success: false,
             message: "An error occurred while adding interests."
+        };
+    }
+}
+
+export async function getAbilities(resumeId: number): Promise<Ability[]> {
+    const statement = db.prepare(`SELECT * FROM abilities WHERE resumeId = ?`);
+    const abilities = statement.all(resumeId) as Ability[]; 
+
+    return abilities;
+}
+
+export async function addAbilities(formData: FormData, resumeId: number) {
+    console.log("Adding abilities for resumeId:", resumeId);
+    const abilitiesString = formData.get("abilities") as string;
+    
+    if(!abilitiesString) return { success: false, message: "No abilities data provided." };
+
+    try { 
+        let rawJson = JSON.parse(abilitiesString);
+        
+        const validation = abilitySchema.safeParse(rawJson);
+        
+        if(!validation.success) {
+            console.error("Validation errors:", validation.error.format());
+            return { success: false, message: "Invalid abilities data." };
+        }
+
+        const abilitiesArray = validation.data; 
+        
+        const deleteOld = db.prepare(`DELETE FROM abilities WHERE resumeId = ?`);
+        const insertNew = db.prepare(`INSERT INTO abilities (resumeId, title, level) VALUES (?, ?, ?)`);
+
+        const runTransaction = db.transaction((data) => { 
+            deleteOld.run(resumeId);
+            
+            for(const ability of data) {
+                insertNew.run(
+                    resumeId,
+                    ability.title,
+                    ability.level
+                );
+            }
+        }); 
+
+        runTransaction(abilitiesArray);
+
+        console.log(`Abilities added successfully for resumeId ${resumeId}!`);
+        revalidatePath(`/create-cv/${resumeId}/informations`);
+        return {
+            success: true,
+            message: "Abilities added successfully!"
+        };
+    } catch(error) { 
+        console.error("Error adding abilities:", error);
+        return {
+            success: false,
+            message: "An error occurred while adding abilities."
         };
     }
 }

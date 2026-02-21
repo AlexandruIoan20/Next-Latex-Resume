@@ -91,3 +91,11 @@ export type Interest = {
   resumeId: number; 
   title: string; 
 }
+
+export interface Ability {
+  id?: number;
+  resumeId?: number;
+  title: string;
+  level: "0" | "1" | "2" | "3" | "4" | "5" | "6";
+  sortOrder?: number;
+}
