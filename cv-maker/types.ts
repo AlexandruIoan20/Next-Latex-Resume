@@ -50,4 +50,13 @@ export type Education = {
   sortOrder: number; 
 }
 
+export type Project = { 
+  id: number; 
+  resumeId: number; 
+  title: string; 
+  description?: string; 
+  link?: string; 
+  techStack?: string; 
+  sortOrder: number; 
+}
 
