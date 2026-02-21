@@ -19,9 +19,6 @@ export async function addContactDetails(formData: FormData, resumeId: number) {
         ? new Date(rawBirthDate as string).toISOString().split("T")[0]
         : null;
 
-    console.log("Hello World")
-    console.log(birthDate);
-
     const statement = db.prepare(`
         INSERT INTO contact_details (
             resumeId, phoneNumber, address, city, county, birthDate, birthPlace, nationality, civilStatus, linkedIn, personalWebsite

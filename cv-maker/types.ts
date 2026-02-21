@@ -30,4 +30,24 @@ export type BackendExperience = {
   sortOrder: number;
 }
 
+export type BackendEducation = { 
+  id: number; 
+  resumeId: number; 
+  degree: string; 
+  school: string; 
+  startDate?: string | undefined; 
+  finishDate?: string | undefined; 
+  sortOrder: number; 
+}; 
+
+export type Education = { 
+  id: number; 
+  resumeId: number; 
+  degree: string; 
+  school: string; 
+  startDate?: Date | undefined; 
+  finishDate?: Date | undefined; 
+  sortOrder: number; 
+}
+
 

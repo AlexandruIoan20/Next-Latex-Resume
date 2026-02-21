@@ -31,8 +31,8 @@ import { addExperiences } from "../actions"
 import { Experience } from "@/types"
 
 interface ExperiencesFormProps {
-    resumeId: number;
-    previousExperience: Experience[];
+  resumeId: number;
+  previousExperience: Experience[];
 }
 
 export const experienceSchema = z.object({
@@ -51,7 +51,7 @@ export const experienceSchema = z.object({
 });
 
 export default function ExperiencesForm({ resumeId, previousExperience }: ExperiencesFormProps) { 
-    const [openItems, setOpenItems] = useState<Record<string, boolean>>({});
+    const [ openItems, setOpenItems ] = useState<Record<string, boolean>>({});
     
     const form = useForm<z.infer<typeof experienceSchema>>({
       resolver: zodResolver(experienceSchema),
