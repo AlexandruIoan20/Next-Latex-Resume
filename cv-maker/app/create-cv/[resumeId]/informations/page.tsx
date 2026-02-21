@@ -1,8 +1,8 @@
 import FormsList from "./(components)/forms-list";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { getExperiences, getEducation } from "./actions";
-import { Education, Experience } from "@/types";
+import { getExperiences, getEducation, getProjects} from "./actions";
+import { Education, Experience, Project } from "@/types";
 
 interface PageProps { 
     params: Promise<{ resumeId: number }>;
@@ -17,12 +17,13 @@ export default async function InformationsPage ({ params }: PageProps) {
     
     const previousExperience: Experience[] = await getExperiences(resumeId);
     const previousEducation: Education[] = await getEducation(resumeId); 
+    const previousProjects: Project[] = await getProjects(resumeId); 
 
     console.log("InformationsPage rendered with resumeId:", resumeId);
 
     return ( 
         <div className = "bg-zinc-950 min-h-screen">
-            <FormsList resumeId = { resumeId } previousExperience = { previousExperience } previousEducation = { previousEducation } />
+            <FormsList resumeId = { resumeId } previousExperience = { previousExperience } previousEducation = { previousEducation } previousProjects = { previousProjects } />
         </div>
     )
 }; 

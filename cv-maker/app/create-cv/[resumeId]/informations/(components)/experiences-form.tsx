@@ -1,22 +1,12 @@
 "use client"
 
-import { useFieldArray, useForm } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { Plus, Trash2, Briefcase, ArrowUp, ArrowDown, ChevronDown } from "lucide-react"
+import { Briefcase } from "lucide-react"
 import { UpdatedDatePicker } from "@/components/ui/updated-date-picker"
-import { cn } from "@/lib/utils"
-import { useState } from "react"
 
 import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible"
-
-import { Button } from "@/components/ui/button"
-import {
-  Form,
   FormControl,
   FormField,
   FormItem,
@@ -25,11 +15,10 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { SortableArraySection } from "./sortable-array-section"
 
 import { addExperiences } from "../actions"
 import { Experience } from "@/types"
-import { SortableArraySection } from "./sortable-array-section"
 
 interface ExperiencesFormProps {
   resumeId: number;
@@ -84,106 +73,106 @@ export default function ExperiencesForm({ resumeId, previousExperience }: Experi
         })}
         renderFields = {(index) => ( 
           <>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <FormField
-                          control={form.control}
-                          name={`experiences.${index}.title`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-zinc-400 text-xs uppercase tracking-wider">Job Title</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Software Engineer" {...field} className="bg-zinc-950 border-zinc-800 text-zinc-100" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name={`experiences.${index}.employer`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-zinc-400 text-xs uppercase tracking-wider">Employer</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Tech Company" {...field} className="bg-zinc-950 border-zinc-800 text-zinc-100" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name={`experiences.${index}.city`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel className="text-zinc-400 text-xs uppercase tracking-wider">City</FormLabel>
-                              <FormControl>
-                                <Input placeholder="Iași" {...field} className="bg-zinc-950 border-zinc-800 text-zinc-100" />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <FormField
-                          control={form.control}
-                          name={`experiences.${index}.startDate`}
-                          render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                                  <FormLabel className="text-zinc-400 text-xs uppercase tracking-wider">
-                                    Start Date
-                                  </FormLabel>
-                                  <FormControl>
-                                    <UpdatedDatePicker
-                                      mode="start"
-                                      value={field.value}
-                                      onChange={field.onChange}
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                              </FormItem>
-                          )}
-                        />
-                        <FormField
-                          control={form.control}
-                          name={`experiences.${index}.finishDate`}
-                          render={({ field }) => (
-                            <FormItem className="flex flex-col">
-                                  <FormLabel className="text-zinc-400 text-xs uppercase tracking-wider">
-                                    Finish Date
-                                  </FormLabel>
-                                  <FormControl>
-                                    <UpdatedDatePicker
-                                      mode="finish"
-                                      value={field.value}
-                                      onChange={field.onChange}
-                                      placeholder="Present / Pick date"
-                                    />
-                                  </FormControl>
-                                  <FormMessage />
-                              </FormItem>
-                          )}
-                        />
-                      </div>
-
-                      <FormField
-                        control={form.control}
-                        name={`experiences.${index}.description`}
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel className="text-zinc-400 text-xs uppercase tracking-wider">Description / Key Achievements</FormLabel>
-                            <FormControl>
-                              <RichTextEditor
-                                value={field.value || ""}
-                                onChange={field.onChange}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <FormField
+                control={form.control}
+                name={`experiences.${index}.title`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-zinc-400 text-xs uppercase tracking-wider">Job Title</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Software Engineer" {...field} className="bg-zinc-950 border-zinc-800 text-zinc-100" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
+              <FormField
+                control={form.control}
+                name={`experiences.${index}.employer`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-zinc-400 text-xs uppercase tracking-wider">Employer</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Tech Company" {...field} className="bg-zinc-950 border-zinc-800 text-zinc-100" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`experiences.${index}.city`}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-zinc-400 text-xs uppercase tracking-wider">City</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Iași" {...field} className="bg-zinc-950 border-zinc-800 text-zinc-100" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name={`experiences.${index}.startDate`}
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                        <FormLabel className="text-zinc-400 text-xs uppercase tracking-wider">
+                          Start Date
+                        </FormLabel>
+                        <FormControl>
+                          <UpdatedDatePicker
+                            mode="start"
+                            value={field.value}
+                            onChange={field.onChange}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name={`experiences.${index}.finishDate`}
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                        <FormLabel className="text-zinc-400 text-xs uppercase tracking-wider">
+                          Finish Date
+                        </FormLabel>
+                        <FormControl>
+                          <UpdatedDatePicker
+                            mode="finish"
+                            value={field.value}
+                            onChange={field.onChange}
+                            placeholder="Present / Pick date"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                    </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name={`experiences.${index}.description`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-zinc-400 text-xs uppercase tracking-wider">Description / Key Achievements</FormLabel>
+                  <FormControl>
+                    <RichTextEditor
+                      value={field.value || ""}
+                      onChange={field.onChange}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </>
         )}
       />

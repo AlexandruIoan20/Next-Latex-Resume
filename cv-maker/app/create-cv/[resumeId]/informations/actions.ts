@@ -4,7 +4,7 @@ import db from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import * as z from "zod";
 import { toSqlDate, fromSqlDate } from "@/lib/dateTransformer";
-import { BackendEducation, BackendExperience, Education, Experience } from "@/types";
+import { BackendEducation, BackendExperience, Education, Experience, Project } from "@/types";
 
 const experienceSchema = z.array(z.object({
     title: z.string().min(1, "Title is required"),
@@ -23,6 +23,17 @@ const educationSchema = z.array(
         school: z.string().min(1, "School is required!"), 
         startDate: z.coerce.date().refine(date => date <= new Date(), "Start date cannot be in the future").optional().nullable(), 
         finishDate: z.coerce.date().refine(date => date <= new Date(), "Finish date cannot be in the future").optional().nullable(),
+    })
+); 
+
+const projectSchema = z.array( 
+    z.object({ 
+        id: z.number().optional(), 
+        resumeId: z.number().optional(), 
+        title: z.string().min(1, "Title is required"), 
+        description: z.string(), 
+        link: z.string(), 
+        techStack: z.string(), 
     })
 ); 
 
@@ -154,7 +165,6 @@ export async function addEducation(formData: FormData, resumeId: number)  {
 
     try { 
         const rawJson = JSON.parse(educationString);  
-        console.log( rawJson ); 
         const validation = educationSchema.safeParse(rawJson); 
         console.log("Validation result: ", validation.success); 
 
@@ -197,10 +207,66 @@ export async function addEducation(formData: FormData, resumeId: number)  {
             message: "Education added successfully!"
         }
     } catch(error) { 
-        console.log(error); 
+        console.error(error); 
         return { 
             success: false, 
-            message: "An error occured while adding education"
+            message: "An error occured while adding education."
+        }
+    }
+}
+
+export async function getProjects(resumeId: number): Promise<Project[]> { 
+    const statement = db.prepare(`SELECT * FROM projects WHERE resumeId = ?`); 
+    const projects = statement.all(resumeId) as Project[]; 
+
+    return projects; 
+}
+
+export async function addProject(formData: FormData, resumeId: number) { 
+    console.log("Start adding projects for resumeId: ", resumeId); 
+    const projectString = formData.get("projects") as string; 
+    if(!projectString) return { success: false, message: "No projects data provided" }; 
+
+    try { 
+        const rawJson = JSON.parse(projectString); 
+        const validation = projectSchema.safeParse(rawJson); 
+        console.log("Validation result: ", validation.success); 
+
+        if(!validation.success) { 
+            console.error("Validation error: ", validation.error.format()); 
+            return { success: false, message: "Invalid project data." }; 
+        }
+
+        const projectsArray = validation.data; 
+        const deleteOld = db.prepare(`DELETE FROM projects WHERE resumeId = ?`); 
+        const insertNew = db.prepare(`INSERT INTO projects (resumeId, title, description, link, techStack) VALUES (?, ?, ?, ?, ?)`); 
+
+        const runTransaction = db.transaction((data) => { 
+            deleteOld.run(resumeId); 
+            for (const p of data) { 
+                insertNew.run(
+                    resumeId, 
+                    p.title, 
+                    p.descriotion, 
+                    p.link, 
+                    p.description
+                )   
+            }
+        }); 
+
+        runTransaction(projectsArray); 
+
+        console.log("Projects added successfully for resumeId: ", resumeId); 
+        revalidatePath(`/create-cv/${resumeId}/informations`);
+        return {
+            success: true,
+            message: "Education added successfully!"
+        }
+    } catch(error) { 
+        console.error(error); 
+        return { 
+            success: false, 
+            message: "An error occured while adding projects."
         }
     }
 }
