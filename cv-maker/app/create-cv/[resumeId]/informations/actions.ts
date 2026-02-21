@@ -4,7 +4,7 @@ import db from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import * as z from "zod";
 import { toSqlDate, fromSqlDate } from "@/lib/dateTransformer";
-import { BackendEducation, BackendExperience, Education, Experience, Project, BackendCourse, Course} from "@/types";
+import { BackendEducation, BackendExperience, Education, Experience, Project, BackendCourse, Course, Language } from "@/types";
 
 const experienceSchema = z.array(z.object({
     title: z.string().min(1, "Title is required"),
@@ -48,6 +48,14 @@ const courseSchema = z.array(
     })
 ); 
 
+const languageSchema = z.array(
+    z.object({ 
+        id: z.number().optional(),
+        resumeId: z.number().optional(),
+        language: z.string().min(1, "Language is required"),
+        level: z.enum(["A1", "A2", "B1", "B2", "C1", "C2"]),
+    })
+); 
 export async function getExperiences(resumeId: number): Promise<Experience[]> {
     const statement = db.prepare("SELECT * FROM experiences WHERE resumeId = ?");
     let experiences: BackendExperience[] = statement.all(resumeId) as BackendExperience[]; 
@@ -371,6 +379,63 @@ export async function addCourses(formData: FormData, resumeId: number) {
         return {
             success: false,
             message: "An error occurred while adding courses."
+        }
+    }
+}
+
+export async function getLanguages(resumeId: number): Promise<Language[]> { 
+    const statement = db.prepare(`SELECT * FROM languages WHERE resumeId = ? ORDER BY sortOrder ASC`); 
+    const languages = statement.all(resumeId) as Language[]; 
+
+    return languages; 
+}
+
+export async function addLanguages(formData: FormData, resumeId: number) {
+    console.log("Adding languages for resumeId:", resumeId);
+    const languagesString = formData.get("languages") as string;
+    
+    if(!languagesString) return { success: false, message: "No languages data provided." };
+
+    try { 
+        let rawJson = JSON.parse(languagesString);
+        const validation = languageSchema.safeParse(rawJson);
+        
+        if(!validation.success) {
+            console.error("Validation errors:", validation.error.format());
+            return { success: false, message: "Invalid languages data." };
+        }
+
+        const languagesArray = validation.data; 
+        
+        const deleteOld = db.prepare(`DELETE FROM languages WHERE resumeId = ?`);
+        const insertNew = db.prepare(`INSERT INTO languages (resumeId, language, level, sortOrder) VALUES (?, ?, ?, ?)`);
+
+        const runTransaction = db.transaction((data) => { 
+            deleteOld.run(resumeId);
+            
+            for(const lang of data) {
+                insertNew.run(
+                    resumeId,
+                    lang.language,
+                    lang.level,
+                    lang.sortOrder // Inserăm indexul pe care l-am setat din client
+                );
+            }
+        }); 
+
+        runTransaction(languagesArray);
+
+        console.log(`Languages added successfully for resumeId ${resumeId}!`);
+        revalidatePath(`/create-cv/${resumeId}/informations`);
+        return {
+            success: true,
+            message: "Languages added successfully!"
+        }
+    } catch(error) { 
+        console.error("Error adding languages:", error);
+        return {
+            success: false,
+            message: "An error occurred while adding languages."
         }
     }
 }

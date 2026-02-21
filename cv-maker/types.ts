@@ -78,3 +78,10 @@ export type Course = {
   finishDate: Date | undefined; 
 }
 
+export interface Language {
+  id: number;
+  resumeId: number;
+  language: string;
+  level: "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
+  sortOrder?: number;
+}
