@@ -92,10 +92,18 @@ export type Interest = {
   title: string; 
 }
 
-export interface Ability {
+export type Ability = {
   id?: number;
   resumeId?: number;
   title: string;
   level: "0" | "1" | "2" | "3" | "4" | "5" | "6";
   sortOrder?: number;
+}
+
+export type Resume = { 
+  id: number; 
+  userId: number; 
+  title: string; 
+  template: string; 
+  description?: string; 
 }

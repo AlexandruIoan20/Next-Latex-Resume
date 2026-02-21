@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { nanoid } from "nanoid"; 
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { User } from "@/types";
 
 export async function loginUser(formData: FormData) { 
     const currentUser = await getCurrentUser(); 

@@ -105,7 +105,7 @@ export default function FormsList({
         </div>
 
         {/* CONTENT AREA */}
-        <div className="w-full min-h-[500px]">
+        <div className="w-full min-h-125">
           <TabsContent value="experiences" className="m-0">
             <ExperiencesForm
               resumeId={resumeId}
@@ -168,7 +168,7 @@ export default function FormsList({
               <button
                 key={section.id}
                 onClick={() => setActiveTab(section.id)}
-                className={`flex flex-col items-center justify-center min-w-[90px] py-3 text-xs transition-all ${
+                className={`flex flex-col items-center justify-center min-w-22.5 py-3 text-xs transition-all ${
                   isActive
                     ? "text-violet-400"
                     : "text-zinc-500"
