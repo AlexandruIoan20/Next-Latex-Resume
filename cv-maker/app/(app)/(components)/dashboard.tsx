@@ -5,6 +5,8 @@ import { createCV } from "../create-cv/actions";
 import { Resume } from "@/types";
 import ResumeCard from "./resume-card";
 
+import { renameCV } from "../actions";
+
 interface DashboardProps { 
     resumes: Resume[], 
 }
@@ -17,6 +19,11 @@ export const Dashboard = ({ resumes }: DashboardProps) => {
 
         const resumeId = await createCV(userId);
         router.push(`/create-cv/${resumeId}/contact-details`);
+    }
+
+    const handleRename = async(resumeId: number, title: string) => { 
+        console.log("Handle rename called for parameters: ", resumeId, " ", title); 
+        const response = await renameCV(resumeId, title); 
     }
 
     return (
@@ -33,7 +40,7 @@ export const Dashboard = ({ resumes }: DashboardProps) => {
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                     {resumes.map((resume) => (
-                        <ResumeCard key={resume.id} resume={resume} />
+                        <ResumeCard key={resume.id} resume={resume} onRename = { handleRename } />
                     ))}
                 </div>
             )}

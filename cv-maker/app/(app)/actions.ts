@@ -1,14 +1,30 @@
+'use server'
+
 import db from "@/lib/db";
 import { Resume } from "@/types";
 
-export async function getResumes (userId: number) { 
-    try { 
-        const statement = db.prepare(`SELECT * FROM resumes WHERE userId = ?`); 
-        const resumes = statement.all(userId) as Resume[]; 
+export async function getResumes(userId: number) {
+    try {
+        const statement = db.prepare(`SELECT * FROM resumes WHERE userId = ?`);
+        const resumes = statement.all(userId) as Resume[];
 
-        return resumes; 
+        return resumes;
+    } catch (error) {
+        console.log(error);
+        return [];
+    }
+}
+
+export async function renameCV(resumeId: number, title: string) { 
+    try { 
+        const statement = db.prepare(`UPDATE resumes SET title = ? WHERE id = ?`); 
+        const info = statement.run(title, resumeId); 
+
+        if(info.changes === 0) return { success: false, message: "The CV was not found" }; 
+
+        return { success: true, message: "CV's name was changed successfully!" }; 
     } catch(error) { 
         console.log(error); 
-        return []; 
+        return { success: false, message: "An error occured while changing the cv title." }; 
     }
 }
