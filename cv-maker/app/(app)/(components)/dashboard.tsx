@@ -9,14 +9,13 @@ import { renameCV } from "../actions";
 
 interface DashboardProps { 
     resumes: Resume[], 
+    userId: number; 
 }
 
-export const Dashboard = ({ resumes }: DashboardProps) => {
+export const Dashboard = ({ resumes, userId }: DashboardProps) => {
     const router = useRouter();
 
     const handleCreateCV = async () => { 
-        const userId = 1; // TODO: replace with actual user id
-
         const resumeId = await createCV(userId);
         router.push(`/create-cv/${resumeId}/contact-details`);
     }

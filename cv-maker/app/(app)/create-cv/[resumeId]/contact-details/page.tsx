@@ -1,6 +1,7 @@
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import ContactDetailsForm from "./contact-details-form";
+import CVPagination from "../../(components)/cv-pagination";
 
 interface PageProps {
   params: Promise<{ resumeId: number }>;
@@ -17,6 +18,9 @@ export default async function ContactDetailsPage({ params }: PageProps) {
     }
 
     return (
-        <ContactDetailsForm resumeId={resumeId} />
+        <>
+            <ContactDetailsForm resumeId={resumeId} />
+            <CVPagination linkRight = { `/create-cv/${resumeId}/informations` } />
+        </>
     );
 }

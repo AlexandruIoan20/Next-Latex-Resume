@@ -3,8 +3,6 @@
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
-import { format } from "date-fns"
-import { CalendarIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -24,11 +22,12 @@ import {
   CardDescription,
   CardFooter,
 } from "@/components/ui/card"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Calendar } from "@/components/ui/calendar"
+import { UpdatedDatePicker } from "@/components/ui/updated-date-picker"
 import { addContactDetails } from "./actions"
 
 const formSchema = z.object({ 
+    firstName: z.string().min(1, "First name is required."), 
+    lastName: z.string().min(1, "Last name is required"), 
     phoneNumber: z.string().min(1, "Phone number is required."),
     address: z.string(),
     city: z.string(),
@@ -94,7 +93,35 @@ export default function ContactDetailsForm({ resumeId }: { resumeId: number }) {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="firstName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>First Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} className="bg-zinc-950 border-zinc-800" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
+                <FormField
+                  control={form.control}
+                  name="lastName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Last Name</FormLabel>
+                      <FormControl>
+                        <Input {...field} className="bg-zinc-950 border-zinc-800" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
               <FormField
                 control={form.control}
                 name="phoneNumber"
@@ -157,29 +184,11 @@ export default function ContactDetailsForm({ resumeId }: { resumeId: number }) {
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel>Birth Date</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant="outline"
-                            className="bg-zinc-950 border-zinc-800 justify-start text-left font-normal"
-                          >
-                            {field.value
-                              ? format(field.value, "PPP")
-                              : "Pick a date"}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50 text-white" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 bg-zinc-900 border-zinc-800">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
+                      <UpdatedDatePicker
+                        mode="start"
+                        value={field.value}
+                        onChange={field.onChange}
+                      />
                     <FormMessage />
                   </FormItem>
                 )}

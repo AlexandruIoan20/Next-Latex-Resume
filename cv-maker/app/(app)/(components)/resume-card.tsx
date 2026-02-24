@@ -7,7 +7,6 @@ import { Resume } from "@/types";
 
 interface ResumeCardProps {
   resume: Resume;
-  // Am adăugat acest prop pentru a putea trimite noul nume către baza de date / părinte
   onRename?: (id: number, newTitle: string) => void;
 }
 
@@ -52,7 +51,7 @@ export default function ResumeCard({ resume, onRename }: ResumeCardProps) {
 
   return (
     <Link
-      href={`/resumes/${resume.id}`}
+      href={`/create-cv/${resume.id}/contact-details`}
       className="group block w-full"
     >
       <div className="

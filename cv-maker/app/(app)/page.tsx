@@ -31,7 +31,7 @@ export default async function DashboardPage() {
           </div>
         </div>
         <div className="bg-zinc-900/40 border border-zinc-800 rounded-2xl p-6 md:p-8 shadow-lg">
-          <Dashboard resumes = { resumes } />
+          <Dashboard userId = { user.id } resumes = { resumes } />
         </div>
 
       </div>

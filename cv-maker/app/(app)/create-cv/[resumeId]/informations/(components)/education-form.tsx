@@ -100,9 +100,9 @@ export default function EducationForm({ resumeId, previousEducation }: Education
                         </FormLabel>
                         <FormControl>
                             <UpdatedDatePicker
-                            mode="start"
-                            value={field.value}
-                            onChange={field.onChange}
+                                mode="start"
+                                value={field.value}
+                                onChange={field.onChange}
                             />
                         </FormControl>
                         <FormMessage />

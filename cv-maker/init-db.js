@@ -29,6 +29,8 @@ db.exec(`
 db.exec(`
   CREATE TABLE IF NOT EXISTS contact_details (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    firstName TEXT NOT NULL, 
+    lastName TEXT NOT NULL, 
     resumeId INTEGER NOT NULL,
     phoneNumber TEXT NOT NULL,
     address TEXT,

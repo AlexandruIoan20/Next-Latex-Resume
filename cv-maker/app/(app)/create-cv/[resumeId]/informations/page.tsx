@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { getExperiences, getEducation, getProjects, getCourses, getLanguages, getInterests, getAbilities } from "./actions";
 import { Ability, Course, Education, Experience, Interest, Language, Project } from "@/types";
 
+import CVPagination from "../../(components)/cv-pagination";
+
 interface PageProps { 
     params: Promise<{ resumeId: number }>;
 }
@@ -36,6 +38,11 @@ export default async function InformationsPage ({ params }: PageProps) {
                 previousProjects = { previousProjects } 
                 previousInterests = { previousInterests }
                 previousAbilities = { previousAbilities }
+            />
+
+            <CVPagination 
+                linkLeft = { `/create-cv/${resumeId}/contact-details` }
+                linkRight = { `/create-cv/${resumeId}/download` }
             />
         </div>
     )
