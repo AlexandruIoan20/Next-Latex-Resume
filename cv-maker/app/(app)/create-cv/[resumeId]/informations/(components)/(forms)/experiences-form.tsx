@@ -15,9 +15,9 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
-import { SortableArraySection } from "./sortable-array-section"
+import { SortableArraySection } from "../sortable-array-section"
 
-import { addExperiences } from "../actions"
+import { addExperiences } from "../../actions"
 import { Experience } from "@/types"
 
 interface ExperiencesFormProps {

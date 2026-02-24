@@ -14,9 +14,10 @@ import {
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { RichTextEditor } from "@/components/ui/rich-text-editor"
-import { SortableArraySection } from "./sortable-array-section"
+import { SortableArraySection } from "../sortable-array-section"
+
 import { Project } from "@/types"
-import { addProject } from "../actions"
+import { addProject } from "../../actions"
 
 export const projectSchema = z.object({ 
     projects: z.array(

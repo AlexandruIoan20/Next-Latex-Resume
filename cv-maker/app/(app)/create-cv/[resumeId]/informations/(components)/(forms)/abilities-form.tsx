@@ -20,9 +20,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { SortableArraySection } from "./sortable-array-section"
+import { SortableArraySection } from "../sortable-array-section"
 
-import { addAbilities } from "../actions"
+import { addAbilities } from "../../actions"
 import { Ability } from "@/types"
 
 interface AbilitiesFormProps {

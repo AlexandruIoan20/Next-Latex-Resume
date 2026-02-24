@@ -2,7 +2,7 @@
 
 import db from "@/lib/db";
 
-export  async function createCV(userId: number) { 
+export async function createCV(userId: number) { 
     const statement = db.prepare(`
         INSERT INTO resumes (userId) VALUES (?)
     `);

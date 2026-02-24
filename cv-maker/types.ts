@@ -100,10 +100,16 @@ export type Ability = {
   sortOrder?: number;
 }
 
-export type Resume = { 
-  id: number; 
-  userId: number; 
-  title: string; 
-  template: string; 
-  description?: string; 
-}
+export type Resume = {
+  id: number;
+  userId: number;
+  title: string;
+  description: string | null;
+  experiencesTitle: string;
+  educationTitle: string;
+  projectsTitle: string;
+  coursesTitle: string;
+  languagesTitle: string;
+  interestsTitle: string;
+  abilitiesTitle: string;
+};

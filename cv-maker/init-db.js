@@ -21,6 +21,13 @@ db.exec(`
     userId INTEGER NOT NULL,
     title TEXT DEFAULT 'New CV',
     description TEXT,
+    experiencesTitle TEXT DEFAULT 'Experiences',
+    educationTitle TEXT DEFAULT 'Education',
+    projectsTitle TEXT DEFAULT 'Projects',
+    coursesTitle TEXT DEFAULT 'Courses',
+    languagesTitle TEXT DEFAULT 'Languages',
+    interestsTitle TEXT DEFAULT 'Interests',
+    abilitiesTitle TEXT DEFAULT 'Abilities',
     FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
   );
 `);

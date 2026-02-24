@@ -14,9 +14,9 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { SortableArraySection } from "./sortable-array-section"
+import { SortableArraySection } from "../sortable-array-section"
 
-import { addCourses } from "../actions"
+import { addCourses } from "../../actions"
 import { Course } from "@/types" 
 
 interface CoursesFormProps {

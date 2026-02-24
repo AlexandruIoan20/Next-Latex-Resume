@@ -20,9 +20,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { SortableArraySection } from "./sortable-array-section"
+import { SortableArraySection } from "../sortable-array-section"
 
-import { addLanguages } from "../actions"
+import { addLanguages } from "../../actions"
 import { Language } from "@/types" 
 
 interface LanguagesFormProps {

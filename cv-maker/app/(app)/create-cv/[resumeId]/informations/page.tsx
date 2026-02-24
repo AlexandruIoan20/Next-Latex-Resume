@@ -2,7 +2,9 @@ import FormsList from "./(components)/forms-list";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { getExperiences, getEducation, getProjects, getCourses, getLanguages, getInterests, getAbilities } from "./actions";
-import { Ability, Course, Education, Experience, Interest, Language, Project } from "@/types";
+import { Ability, Course, Education, Experience, Interest, Language, Project, Resume } from "@/types";
+
+import { getResume } from "./actions";
 
 import CVPagination from "../../(components)/cv-pagination";
 
@@ -16,6 +18,8 @@ export default async function InformationsPage ({ params }: PageProps) {
 
     const resolvedParams = await params; 
     const resumeId = Number(resolvedParams.resumeId);
+
+    const resume: Resume | undefined = await getResume(resumeId); 
     
     const previousExperience: Experience[] = await getExperiences(resumeId);
     const previousEducation: Education[] = await getEducation(resumeId); 
@@ -31,6 +35,7 @@ export default async function InformationsPage ({ params }: PageProps) {
         <div className = "bg-zinc-950 min-h-screen">
             <FormsList 
                 resumeId = { resumeId }
+                resume = { resume }
                 previousCourses = { previousCourses } 
                 previousLanguages = { previousLanguages }
                 previousExperience = { previousExperience } 

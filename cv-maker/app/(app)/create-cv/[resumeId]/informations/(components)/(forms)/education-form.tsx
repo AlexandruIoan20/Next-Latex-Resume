@@ -9,9 +9,9 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/comp
 import { Input } from "@/components/ui/input"
 import { UpdatedDatePicker } from "@/components/ui/updated-date-picker"
 
-import { SortableArraySection } from "./sortable-array-section"
+import { SortableArraySection } from "../sortable-array-section"
 import { Education } from "@/types"
-import { addEducation } from "../actions"
+import { addEducation } from "../../actions"
 
 interface EducationFormProps { 
     resumeId: number; 

@@ -4,7 +4,8 @@ import db from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import * as z from "zod";
 import { toSqlDate, fromSqlDate } from "@/lib/dateTransformer";
-import { BackendEducation, BackendExperience, Education, Experience, Project, BackendCourse, Course, Language, Interest, Ability } from "@/types";
+import { BackendEducation, BackendExperience, Education, Resume, Experience, Project, BackendCourse, Course, Language, Interest, Ability } from "@/types";
+import { ResumeSections } from "@/lib/constants";
 
 const experienceSchema = z.array(z.object({
     title: z.string().min(1, "Title is required"),
@@ -569,4 +570,58 @@ export async function addAbilities(formData: FormData, resumeId: number) {
             message: "An error occurred while adding abilities."
         };
     }
+}
+
+export const renameSection = async (resumeId: number, sectionTitle: string, newTitle: string) => { 
+    console.log(`[renameSection] START - resumeId: ${resumeId}, sectionTitle: "${sectionTitle}", newTitle: "${newTitle}"`);
+
+    const columnMap: Record<string, string> = {
+        [ResumeSections.experiences]: "experiencesTitle",
+        [ResumeSections.education]: "educationTitle",
+        [ResumeSections.projects]: "projectsTitle",
+        [ResumeSections.courses]: "coursesTitle",
+        [ResumeSections.languages]: "languagesTitle",
+        [ResumeSections.interests]: "interestsTitle",
+        [ResumeSections.abilities]: "abilitiesTitle",
+    };
+
+    const targetColumn = columnMap[sectionTitle];
+    
+    console.log(`[renameSection] Mapped column: ${targetColumn}`);
+
+    if (!targetColumn) {
+        console.warn(`[renameSection] WARNING - Invalid section title provided: "${sectionTitle}"`);
+        return { success: false, message: "Invalid section title provided." };
+    }
+
+    try {
+        const query = `UPDATE resumes SET ${targetColumn} = ? WHERE id = ?`;
+        
+        console.log(`[renameSection] Executing query: ${query}`);
+        
+        const statement = db.prepare(query); 
+        const info = statement.run(newTitle, resumeId); 
+        
+        console.log(`[renameSection] Query result (info):`, info);
+
+        if (info.changes === 0) {
+            console.log(`[renameSection] FAIL - No rows updated (changes = 0). Resume ID ${resumeId} might not exist.`);
+            return { success: false, message: "Resume not found or no changes made." }; 
+        }
+
+        console.log(`[renameSection] SUCCESS - Section renamed to "${newTitle}"`);
+        return { success: true, message: "Section name changed successfully!" };
+        
+    } catch (error) {
+        console.error(`[renameSection] ERROR - Database exception:`, error);
+        return { success: false, message: "A database error occurred." };
+    }
+}
+
+export const getResume = async (resumeId: number): Promise<Resume | undefined> => {
+    const statement = db.prepare('SELECT * from resumes where ID = ?');
+    
+    const resume = statement.get(resumeId) as Resume; 
+    
+    return resume;
 }
