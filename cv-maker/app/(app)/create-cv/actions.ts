@@ -1,6 +1,7 @@
 'use server'
 
 import db from "@/lib/db";
+import { Resume } from "@/types";
 
 export async function createCV(userId: number) { 
     const statement = db.prepare(`
@@ -10,3 +11,11 @@ export async function createCV(userId: number) {
 
     return result.lastInsertRowid;
 }   
+
+export const getResume = async (resumeId: number): Promise<Resume | undefined> => {
+    const statement = db.prepare('SELECT * from resumes where ID = ?');
+    
+    const resume = statement.get(resumeId) as Resume; 
+    
+    return resume;
+}

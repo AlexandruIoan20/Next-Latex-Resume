@@ -28,6 +28,13 @@ db.exec(`
     languagesTitle TEXT DEFAULT 'Languages',
     interestsTitle TEXT DEFAULT 'Interests',
     abilitiesTitle TEXT DEFAULT 'Abilities',
+    experiencesIndex INTEGER DEFAULT -1, 
+    educationIndex INTEGER DEFAULT -1, 
+    projectsIndex INTEGER DEFAULT -1, 
+    coursesIndex INTEGER DEFAULT -1, 
+    languagesIndex INTEGER DEFAULT -1, 
+    interestsIndex INTEGER DEFAULT -1, 
+    abilitiesIndex INTEGER DEFAULT -1, 
     FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
   );
 `);
