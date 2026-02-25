@@ -21,7 +21,7 @@ export default async function SortSectionsPage ({ params }: PageProps) {
     const resumeId = Number(resolvedParams.resumeId);
 
     const verifyCV = await verifyCVWithUser(resumeId, currentUser.id); 
-    if(!verifyCV) redirect(""); 
+    if(!verifyCV.success) redirect(""); 
 
     const resume: Resume | undefined = await getResume(resumeId); 
 

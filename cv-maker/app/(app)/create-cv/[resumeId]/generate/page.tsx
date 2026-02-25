@@ -17,7 +17,7 @@ export default async function GeneratePage({ params }: PageProps) {
     const resumeId = Number(resolvedParams.resumeId);
 
     const verifyCV = await verifyCVWithUser(resumeId, user.id)
-    if(!verifyCV) redirect(""); 
+    if(!verifyCV.success) redirect(""); 
 
     return (
         <>

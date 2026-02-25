@@ -17,7 +17,7 @@ export default async function ContactDetailsPage({ params }: PageProps) {
     if (!currentUser) redirect("/login");
 
     const verifyCV = await verifyCVWithUser(resumeId, currentUser.id)
-    if(!verifyCV) redirect(""); 
+    if(!verifyCV.success) redirect("/"); 
 
     return (
         <>

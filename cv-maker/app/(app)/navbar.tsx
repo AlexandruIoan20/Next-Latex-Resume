@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { FileText, LogOut } from "lucide-react";
 import { logoutUser } from "@/lib/auth";
-import { User } from "@/types";
 
 export function Navbar() {
   return (
@@ -18,10 +17,9 @@ export function Navbar() {
           </span>
         </Link>
 
-            {/* Logout Button */}
         <form action={logoutUser}>
             <button className="flex items-center gap-2 bg-violet-600 hover:bg-violet-700 transition-colors px-4 py-2 rounded-xl text-sm font-medium shadow-md">
-                <LogOut />
+                <LogOut className="w-5 h-5" />
             </button>
         </form>
       </div>
