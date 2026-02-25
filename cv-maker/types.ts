@@ -113,3 +113,37 @@ export type Resume = {
   interestsTitle: string;
   abilitiesTitle: string;
 };
+
+export type ContactDetails = { 
+  id: number; 
+  firstName: string; 
+  lastName: string; 
+  resumeId: number; 
+  phoneNumber: string; 
+  address?: string; 
+  city?: string; 
+  county?: string; 
+  birthDate: Date | undefined; 
+  birthPlace?: string; 
+  nationality?: string; 
+  civilStatus?: string; 
+  linkedIn?: string; 
+  personalWebsite?: string; 
+}
+
+export type BackendContactDetails = { 
+  id: number; 
+  firstName: string; 
+  lastName: string; 
+  resumeId: number; 
+  phoneNumber: string; 
+  address?: string; 
+  city?: string; 
+  county?: string; 
+  birthDate: string | undefined; 
+  birthPlace?: string; 
+  nationality?: string; 
+  civilStatus?: string; 
+  linkedIn?: string; 
+  personalWebsite?: string; 
+}

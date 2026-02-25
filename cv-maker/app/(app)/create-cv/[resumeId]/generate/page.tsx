@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { GenerateClientPanel } from "./(components)/generate-client";
 import CVPagination from "../../(components)/cv-pagination";
 
+import { verifyCVWithUser } from "@/app/(app)/actions";
+
 interface PageProps {
     params: Promise<{ resumeId: number }>;
 }
@@ -13,6 +15,9 @@ export default async function GeneratePage({ params }: PageProps) {
 
     const resolvedParams = await params;
     const resumeId = Number(resolvedParams.resumeId);
+
+    const verifyCV = await verifyCVWithUser(resumeId, user.id)
+    if(!verifyCV) redirect(""); 
 
     return (
         <>

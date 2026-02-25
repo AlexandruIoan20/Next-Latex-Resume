@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import { getExperiences, getEducation, getProjects, getCourses, getLanguages, getInterests, getAbilities } from "./actions";
 import { Ability, Course, Education, Experience, Interest, Language, Project, Resume } from "@/types";
 
+import { verifyCVWithUser } from "@/app/(app)/actions";
+
 import { getResume } from "../../actions";
 
 import CVPagination from "../../(components)/cv-pagination";
@@ -18,6 +20,9 @@ export default async function InformationsPage ({ params }: PageProps) {
 
     const resolvedParams = await params; 
     const resumeId = Number(resolvedParams.resumeId);
+
+    const verifyCV = await verifyCVWithUser(resumeId, currentUser.id)
+    if(!verifyCV) redirect(""); 
 
     const resume: Resume | undefined = await getResume(resumeId); 
     

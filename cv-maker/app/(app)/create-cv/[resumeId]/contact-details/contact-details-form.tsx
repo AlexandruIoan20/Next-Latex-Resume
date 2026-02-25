@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -23,7 +24,10 @@ import {
   CardFooter,
 } from "@/components/ui/card"
 import { UpdatedDatePicker } from "@/components/ui/updated-date-picker"
-import { addContactDetails } from "./actions"
+import { saveContactDetails, getContactDetails } from "./actions"
+import { Loader2 } from "lucide-react" 
+
+import { ContactDetails } from "@/types"
 
 const formSchema = z.object({ 
     firstName: z.string().min(1, "First name is required."), 
@@ -37,20 +41,23 @@ const formSchema = z.object({
     nationality: z.string(),
     civilStatus: z.string(),
     linkedIn: z
-    .string()
-    .url("Invalid LinkedIn URL")
-    .or(z.literal("")),
-
+        .string()
+        .url("Invalid LinkedIn URL")
+        .or(z.literal("")),
     personalWebsite: z
-    .string()
-    .url("Invalid personal website URL")
-    .or(z.literal("")),
+        .string()
+        .url("Invalid personal website URL")
+        .or(z.literal("")),
 })
 
 export default function ContactDetailsForm({ resumeId }: { resumeId: number }) {
+  const [isLoading, setIsLoading] = useState(true);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      firstName: "",
+      lastName: "",
       phoneNumber: "",
       address: "",
       city: "",
@@ -64,25 +71,63 @@ export default function ContactDetailsForm({ resumeId }: { resumeId: number }) {
     },
   })
 
+  useEffect(() => {
+    async function fetchInitialData() {
+      try {
+        const data: ContactDetails | null = await getContactDetails(resumeId);
+        
+        if (data) {
+          form.reset({
+            firstName: data.firstName || "",
+            lastName: data.lastName || "",
+            phoneNumber: data.phoneNumber || "",
+            address: data.address || "",
+            city: data.city || "",
+            county: data.county || "",
+            birthDate: data.birthDate ? new Date(data.birthDate) : undefined, 
+            birthPlace: data.birthPlace || "",
+            nationality: data.nationality || "",
+            civilStatus: data.civilStatus || "",
+            linkedIn: data.linkedIn || "",
+            personalWebsite: data.personalWebsite || "",
+          });
+        }
+      } catch (error) {
+        alert("Nu s-au putut încărca datele existente.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchInitialData();
+  }, [resumeId, form]);
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
     const formData = new FormData(); 
     Object.entries(values).forEach(([key, value]) => {
         if (value instanceof Date) {
             formData.append(key, value.toISOString().split("T")[0]); 
-        } else {
-            formData.append(key, value);
+        } else if (value !== null && value !== undefined) {
+            formData.append(key, value.toString());
         }
     }); 
 
-    await addContactDetails(formData, resumeId);
-    alert("Contact details saved successfully!");
+    await saveContactDetails(formData, resumeId);
+  }
+
+  if (isLoading) {
+    return (
+        <div className="flex items-center justify-center min-h-screen bg-zinc-950">
+            <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+        </div>
+    );
   }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-zinc-950 p-4 text-zinc-100">
       <Card className="w-full max-w-2xl text-zinc-300 bg-zinc-900 border-zinc-800 shadow-xl shadow-black/40">
         <CardHeader>
-          <CardTitle className="text-3xl font-bold text-center">
+          <CardTitle className="text-3xl font-bold text-center text-zinc-100">
             Personal Details
           </CardTitle>
           <CardDescription className="text-center text-zinc-400">
@@ -99,11 +144,11 @@ export default function ContactDetailsForm({ resumeId }: { resumeId: number }) {
                   name="firstName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>First Name</FormLabel>
+                      <FormLabel className="text-zinc-300">First Name</FormLabel>
                       <FormControl>
-                        <Input {...field} className="bg-zinc-950 border-zinc-800" />
+                        <Input {...field} className="bg-zinc-950 border-zinc-800 focus-visible:ring-violet-500" />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-red-400" />
                     </FormItem>
                   )}
                 />
@@ -113,25 +158,26 @@ export default function ContactDetailsForm({ resumeId }: { resumeId: number }) {
                   name="lastName"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Last Name</FormLabel>
+                      <FormLabel className="text-zinc-300">Last Name</FormLabel>
                       <FormControl>
-                        <Input {...field} className="bg-zinc-950 border-zinc-800" />
+                        <Input {...field} className="bg-zinc-950 border-zinc-800 focus-visible:ring-violet-500" />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage className="text-red-400" />
                     </FormItem>
                   )}
                 />
               </div>
+
               <FormField
                 control={form.control}
                 name="phoneNumber"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Phone Number</FormLabel>
+                    <FormLabel className="text-zinc-300">Phone Number</FormLabel>
                     <FormControl>
-                      <Input {...field} className="bg-zinc-950 border-zinc-800" />
+                      <Input {...field} className="bg-zinc-950 border-zinc-800 focus-visible:ring-violet-500" />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-red-400" />
                   </FormItem>
                 )}
               />
@@ -142,9 +188,9 @@ export default function ContactDetailsForm({ resumeId }: { resumeId: number }) {
                   name="city"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>City</FormLabel>
+                      <FormLabel className="text-zinc-300">City</FormLabel>
                       <FormControl>
-                        <Input {...field} className="bg-zinc-950 border-zinc-800" />
+                        <Input {...field} className="bg-zinc-950 border-zinc-800 focus-visible:ring-violet-500" />
                       </FormControl>
                     </FormItem>
                   )}
@@ -155,9 +201,9 @@ export default function ContactDetailsForm({ resumeId }: { resumeId: number }) {
                   name="county"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>County</FormLabel>
+                      <FormLabel className="text-zinc-300">County</FormLabel>
                       <FormControl>
-                        <Input {...field} className="bg-zinc-950 border-zinc-800" />
+                        <Input {...field} className="bg-zinc-950 border-zinc-800 focus-visible:ring-violet-500" />
                       </FormControl>
                     </FormItem>
                   )}
@@ -169,27 +215,26 @@ export default function ContactDetailsForm({ resumeId }: { resumeId: number }) {
                 name="address"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Address</FormLabel>
+                    <FormLabel className="text-zinc-300">Address</FormLabel>
                     <FormControl>
-                      <Input {...field} className="bg-zinc-950 border-zinc-800" />
+                      <Input {...field} className="bg-zinc-950 border-zinc-800 focus-visible:ring-violet-500" />
                     </FormControl>
                   </FormItem>
                 )}
               />
 
-              {/* Date Picker */}
               <FormField
                 control={form.control}
                 name="birthDate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Birth Date</FormLabel>
+                    <FormLabel className="text-zinc-300">Birth Date</FormLabel>
                       <UpdatedDatePicker
                         mode="start"
                         value={field.value}
                         onChange={field.onChange}
                       />
-                    <FormMessage />
+                    <FormMessage className="text-red-400" />
                   </FormItem>
                 )}
               />
@@ -199,9 +244,9 @@ export default function ContactDetailsForm({ resumeId }: { resumeId: number }) {
                 name="birthPlace"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Birth Place</FormLabel>
+                    <FormLabel className="text-zinc-300">Birth Place</FormLabel>
                     <FormControl>
-                      <Input {...field} className="bg-zinc-950 border-zinc-800" />
+                      <Input {...field} className="bg-zinc-950 border-zinc-800 focus-visible:ring-violet-500" />
                     </FormControl>
                   </FormItem>
                 )}
@@ -213,9 +258,9 @@ export default function ContactDetailsForm({ resumeId }: { resumeId: number }) {
                   name="nationality"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Nationality</FormLabel>
+                      <FormLabel className="text-zinc-300">Nationality</FormLabel>
                       <FormControl>
-                        <Input {...field} className="bg-zinc-950 border-zinc-800" />
+                        <Input {...field} className="bg-zinc-950 border-zinc-800 focus-visible:ring-violet-500" />
                       </FormControl>
                     </FormItem>
                   )}
@@ -226,9 +271,9 @@ export default function ContactDetailsForm({ resumeId }: { resumeId: number }) {
                   name="civilStatus"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Civil Status</FormLabel>
+                      <FormLabel className="text-zinc-300">Civil Status</FormLabel>
                       <FormControl>
-                        <Input {...field} className="bg-zinc-950 border-zinc-800" />
+                        <Input {...field} className="bg-zinc-950 border-zinc-800 focus-visible:ring-violet-500" />
                       </FormControl>
                     </FormItem>
                   )}
@@ -240,11 +285,11 @@ export default function ContactDetailsForm({ resumeId }: { resumeId: number }) {
                 name="linkedIn"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>LinkedIn</FormLabel>
+                    <FormLabel className="text-zinc-300">LinkedIn</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="https://linkedin.com/in/..." className="bg-zinc-950 border-zinc-800" />
+                      <Input {...field} placeholder="https://linkedin.com/in/..." className="bg-zinc-950 border-zinc-800 focus-visible:ring-violet-500" />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-red-400" />
                   </FormItem>
                 )}
               />
@@ -254,26 +299,29 @@ export default function ContactDetailsForm({ resumeId }: { resumeId: number }) {
                 name="personalWebsite"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Personal Website</FormLabel>
+                    <FormLabel className="text-zinc-300">Personal Website</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="https://yourwebsite.com" className="bg-zinc-950 border-zinc-800" />
+                      <Input {...field} placeholder="https://yourwebsite.com" className="bg-zinc-950 border-zinc-800 focus-visible:ring-violet-500" />
                     </FormControl>
-                    <FormMessage />
+                    <FormMessage className="text-red-400" />
                   </FormItem>
                 )}
               />
 
               <Button
                 type="submit"
-                className="w-full bg-violet-600 hover:bg-violet-700 text-white"
+                disabled={form.formState.isSubmitting}
+                className="w-full bg-violet-600 hover:bg-violet-700 text-white transition-colors"
               >
-                Save Details
+                {form.formState.isSubmitting ? (
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                    "Save Details"
+                )}
               </Button>
-
             </form>
           </Form>
         </CardContent>
-
         <CardFooter />
       </Card>
     </div>
