@@ -1,9 +1,11 @@
 "use client"
 
+import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { addUser } from "./actions"
+import { Eye, EyeOff } from "lucide-react"
 
 // Componentele Shadcn
 import { Button } from "@/components/ui/button"
@@ -27,6 +29,8 @@ const formSchema = z.object({
 })
 
 export default function RegisterForm() {
+  const [showPassword, setShowPassword] = useState(false);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -125,11 +129,25 @@ export default function RegisterForm() {
                   <FormItem>
                     <FormLabel className="text-zinc-300">Password</FormLabel>
                     <FormControl>
-                      <Input 
-                        type="password" 
-                        {...field} 
-                        className="bg-zinc-950 border-zinc-800 text-zinc-300 focus-visible:ring-violet-600 focus-visible:border-violet-600 placeholder:text-zinc-600 transition-all duration-200" 
-                      />
+                      <div className="relative">
+                        <Input 
+                          type={showPassword ? "text" : "password"} 
+                          {...field} 
+                          className="pr-10 bg-zinc-950 border-zinc-800 text-zinc-300 focus-visible:ring-violet-600 focus-visible:border-violet-600 placeholder:text-zinc-600 transition-all duration-200" 
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-300 transition-colors"
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                          <span className="sr-only">Toggle password visibility</span>
+                        </button>
+                      </div>
                     </FormControl>
                     <FormMessage className="text-red-400" />
                   </FormItem>
