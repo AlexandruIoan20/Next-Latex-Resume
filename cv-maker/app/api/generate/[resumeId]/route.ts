@@ -16,10 +16,21 @@ export async function GET (request: NextRequest, { params } : { params: Promise<
         
         const latexString = generateLatexCode(resumeData); 
 
+        const pdfResponse = await fetch("http://localhost:8080/generate-pdf", { 
+            method: "POST", 
+            body: JSON.stringify({ text: latexString }), 
+            headers: { 
+                "Content-Type": "application/json"
+            }
+        }); 
+
+        if(!pdfResponse.ok) throw new Error("PDF Service Failed"); 
+        const pdfBuffer = await pdfResponse.arrayBuffer(); 
+
         return new NextResponse(latexString, { 
             status: 200, 
             headers: { 
-                "Content-Type": "text/plain", // application/pdf
+                "Content-Type": "application/pdf", 
                 "Content-Disposition": `attachment; filename="cv-${resumeId}.tex"`
             }
         })

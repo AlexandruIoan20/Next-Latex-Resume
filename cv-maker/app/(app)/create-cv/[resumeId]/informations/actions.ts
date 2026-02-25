@@ -617,11 +617,3 @@ export const renameSection = async (resumeId: number, sectionTitle: string, newT
         return { success: false, message: "A database error occurred." };
     }
 }
-
-export const getResume = async (resumeId: number): Promise<Resume | undefined> => {
-    const statement = db.prepare('SELECT * from resumes where ID = ?');
-    
-    const resume = statement.get(resumeId) as Resume; 
-    
-    return resume;
-}
