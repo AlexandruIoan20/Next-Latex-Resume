@@ -31,7 +31,7 @@ export function GenerateClientPanel({ resumeId }: GenerateClientPanelProps) {
             a.style.display = 'none'; 
             a.href = url; 
 
-            a.download = `CV_${resumeId}.tex`; 
+            a.download = `CV_${resumeId}.pdf`; 
             document.body.appendChild(a); 
             
             a.click(); 

@@ -75,7 +75,7 @@ export default function ProjectForm({ resumeId, previousProjects }: ProjectFormP
                             name={`projects.${index}.title`}
                             render={({ field }) => (
                             <FormItem>
-                                <FormLabel className="text-zinc-400 text-xs uppercase tracking-wider">Job Title</FormLabel>
+                                <FormLabel className="text-zinc-400 text-xs uppercase tracking-wider">Title</FormLabel>
                                 <FormControl>
                                 <Input placeholder="TO DO List" {...field} className="bg-zinc-950 border-zinc-800 text-zinc-100" />
                                 </FormControl>
@@ -89,7 +89,7 @@ export default function ProjectForm({ resumeId, previousProjects }: ProjectFormP
                             name={`projects.${index}.link`}
                             render={({ field }) => (
                             <FormItem>
-                                <FormLabel className="text-zinc-400 text-xs uppercase tracking-wider">Job Title</FormLabel>
+                                <FormLabel className="text-zinc-400 text-xs uppercase tracking-wider">Link</FormLabel>
                                 <FormControl>
                                 <Input placeholder="https://example.com/to-do-list" {...field} className="bg-zinc-950 border-zinc-800 text-zinc-100" />
                                 </FormControl>

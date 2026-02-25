@@ -80,7 +80,7 @@ export default function EducationForm({ resumeId, previousEducation }: Education
                 name={`education.${index}.school`}
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel className="text-zinc-400 text-xs uppercase tracking-wider">Job Title</FormLabel>
+                    <FormLabel className="text-zinc-400 text-xs uppercase tracking-wider">Institution</FormLabel>
                     <FormControl>
                         <Input placeholder="UAIC" {...field} className="bg-zinc-950 border-zinc-800 text-zinc-100" />
                     </FormControl>
