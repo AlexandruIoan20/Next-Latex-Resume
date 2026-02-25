@@ -299,7 +299,7 @@ export async function addProject(formData: FormData, resumeId: number) {
         revalidatePath(`/create-cv/${resumeId}/informations`);
         return {
             success: true,
-            message: "Education added successfully!"
+            message: "Project added successfully!"
         }
     } catch(error) { 
         console.error(error); 

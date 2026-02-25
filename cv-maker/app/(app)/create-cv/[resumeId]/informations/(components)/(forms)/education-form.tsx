@@ -12,6 +12,7 @@ import { UpdatedDatePicker } from "@/components/ui/updated-date-picker"
 import { SortableArraySection } from "../sortable-array-section"
 import { Education } from "@/types"
 import { addEducation } from "../../actions"
+import { toast } from "sonner"
 
 interface EducationFormProps { 
     resumeId: number; 
@@ -38,9 +39,18 @@ export default function EducationForm({ resumeId, previousEducation }: Education
   });
 
   const onSubmit = async (data: z.infer<typeof educationSchema>) => {
-    const formData = new FormData();
-    formData.append("education", JSON.stringify(data.education));
-    await addEducation(formData, resumeId);
+    try {
+      const formData = new FormData();
+      formData.append("education", JSON.stringify(data.education));
+      await addEducation(formData, resumeId);
+      toast.success("Education saved", {
+        description: "Your education details have been updated successfully.",
+      });
+    } catch (error) {
+      toast.error("Save failed", {
+        description: "Something went wrong while saving. Please try again.",
+      });
+    }
   }
 
   return (

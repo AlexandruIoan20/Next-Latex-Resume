@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { Globe } from "lucide-react"
+import { toast } from "sonner"
 
 import {
   FormControl,
@@ -23,7 +24,7 @@ import {
 import { SortableArraySection } from "../sortable-array-section"
 
 import { addLanguages } from "../../actions"
-import { Language } from "@/types" 
+import { Language } from "@/types"
 
 interface LanguagesFormProps {
   resumeId: number;
@@ -50,14 +51,22 @@ export default function LanguagesForm({ resumeId, previousLanguages }: Languages
   });
 
   const onSubmit = async (data: z.infer<typeof languageSchema>) => {
-    const formData = new FormData();
-    const languagesWithOrder = data.languages.map((lang, index) => ({
-      ...lang,
-      sortOrder: index
-    }));
-    
-    formData.append("languages", JSON.stringify(languagesWithOrder));
-    await addLanguages(formData, resumeId);
+    try {
+      const formData = new FormData();
+      const languagesWithOrder = data.languages.map((lang, index) => ({
+        ...lang,
+        sortOrder: index
+      }));
+      formData.append("languages", JSON.stringify(languagesWithOrder));
+      await addLanguages(formData, resumeId);
+      toast.success("Languages saved", {
+        description: "Your language proficiencies have been updated successfully.",
+      });
+    } catch (error) {
+      toast.error("Save failed", {
+        description: "Something went wrong while saving. Please try again.",
+      });
+    }
   }
 
   return (
@@ -73,7 +82,9 @@ export default function LanguagesForm({ resumeId, previousLanguages }: Languages
       onSubmit={onSubmit}
       getCardHeader={(index) => ({
         title: form.watch(`languages.${index}.language`) || "New Language",
-        subtitle: form.watch(`languages.${index}.level`) ? `Level: ${form.watch(`languages.${index}.level`)}` : "Select a level",
+        subtitle: form.watch(`languages.${index}.level`)
+          ? `Level: ${form.watch(`languages.${index}.level`)}`
+          : "Select a level",
       })}
       renderFields={(index) => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -90,7 +101,7 @@ export default function LanguagesForm({ resumeId, previousLanguages }: Languages
               </FormItem>
             )}
           />
-          
+
           <FormField
             control={form.control}
             name={`languages.${index}.level`}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Download, FileText, Loader2 } from "lucide-react";
@@ -12,38 +13,40 @@ interface GenerateClientPanelProps {
 export function GenerateClientPanel({ resumeId }: GenerateClientPanelProps) {
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleGenerateAction = async () => { 
-        setIsLoading(true); 
+    const handleGenerateAction = async () => {
+        setIsLoading(true);
 
-        try { 
-            const response = await fetch(`/api/generate/${resumeId}`, { 
+        try {
+            const response = await fetch(`/api/generate/${resumeId}`, {
                 method: "GET"
-            }); 
+            });
 
             if (!response.ok) {
-                throw new Error("A apărut o problemă la generarea CV-ului.");
+                throw new Error("Failed to generate CV.");
             }
 
-            const blob = await response.blob(); 
-            const url = window.URL.createObjectURL(blob); 
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
 
-            const a = document.createElement('a'); 
-            a.style.display = 'none'; 
-            a.href = url; 
-
-            a.download = `CV_${resumeId}.pdf`; 
-            document.body.appendChild(a); 
-            
-            a.click(); 
+            const a = document.createElement('a');
+            a.style.display = 'none';
+            a.href = url;
+            a.download = `CV_${resumeId}.pdf`;
+            document.body.appendChild(a);
+            a.click();
 
             window.URL.revokeObjectURL(url);
-            document.body.removeChild(a); 
-            
-            console.log("DONE"); 
-        } catch(error) { 
-            console.log(error); 
-        } finally { 
-            setIsLoading(false); 
+            document.body.removeChild(a);
+
+            toast.success("CV generated successfully", {
+                description: "Your PDF has been downloaded.",
+            });
+        } catch (error) {
+            toast.error("Generation failed", {
+                description: "Something went wrong while generating your CV. Please try again.",
+            });
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -57,15 +60,15 @@ export function GenerateClientPanel({ resumeId }: GenerateClientPanelProps) {
                 </div>
                 <div>
                     <CardTitle className="text-3xl font-bold text-center text-white">
-                        Finalizare CV
+                        Finalize Your CV
                     </CardTitle>
                     <CardDescription className="text-center text-zinc-400 text-base mt-2">
-                        Datele tale sunt pregătite. Apasă butonul pentru a compila și descărca documentul profesional.
+                        Your data is ready. Click the button below to compile and download your professional document.
                     </CardDescription>
                 </div>
             </CardHeader>
             <CardContent className="flex justify-center pt-6 pb-10">
-                <Button 
+                <Button
                     onClick={handleGenerateAction}
                     disabled={isLoading}
                     className="w-full max-w-md bg-violet-600 hover:bg-violet-700 text-white font-semibold py-6 text-lg transition-colors duration-200 shadow-lg shadow-violet-900/20"
@@ -73,12 +76,12 @@ export function GenerateClientPanel({ resumeId }: GenerateClientPanelProps) {
                     {isLoading ? (
                         <>
                             <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                            Se procesează...
+                            Processing...
                         </>
                     ) : (
                         <>
                             <Download className="mr-2 h-5 w-5" />
-                            Generează PDF
+                            Generate PDF
                         </>
                     )}
                 </Button>

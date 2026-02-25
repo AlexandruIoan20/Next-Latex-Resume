@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { Heart } from "lucide-react"
+import { toast } from "sonner"
 
 import {
   FormControl,
@@ -42,10 +43,18 @@ export default function InterestsForm({ resumeId, previousInterests }: Interests
   });
 
   const onSubmit = async (data: z.infer<typeof interestSchema>) => {
-    const formData = new FormData();
-
-    formData.append("interests", JSON.stringify(data.interests));
-    await addInterests(formData, resumeId);
+    try {
+      const formData = new FormData();
+      formData.append("interests", JSON.stringify(data.interests));
+      await addInterests(formData, resumeId);
+      toast.success("Interests saved", {
+        description: "Your interests and hobbies have been updated successfully.",
+      });
+    } catch (error) {
+      toast.error("Save failed", {
+        description: "Something went wrong while saving. Please try again.",
+      });
+    }
   }
 
   return (

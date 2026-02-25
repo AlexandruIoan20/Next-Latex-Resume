@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
+import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -25,33 +26,26 @@ import {
 } from "@/components/ui/card"
 import { UpdatedDatePicker } from "@/components/ui/updated-date-picker"
 import { saveContactDetails, getContactDetails } from "./actions"
-import { Loader2 } from "lucide-react" 
-
+import { Loader2 } from "lucide-react"
 import { ContactDetails } from "@/types"
 
-const formSchema = z.object({ 
-    firstName: z.string().min(1, "First name is required."), 
-    lastName: z.string().min(1, "Last name is required"), 
-    phoneNumber: z.string().min(1, "Phone number is required."),
-    address: z.string(),
-    city: z.string(),
-    county: z.string(),
-    birthDate: z.date(),
-    birthPlace: z.string(),
-    nationality: z.string(),
-    civilStatus: z.string(),
-    linkedIn: z
-        .string()
-        .url("Invalid LinkedIn URL")
-        .or(z.literal("")),
-    personalWebsite: z
-        .string()
-        .url("Invalid personal website URL")
-        .or(z.literal("")),
+const formSchema = z.object({
+  firstName: z.string().min(1, "First name is required."),
+  lastName: z.string().min(1, "Last name is required"),
+  phoneNumber: z.string().min(1, "Phone number is required."),
+  address: z.string(),
+  city: z.string(),
+  county: z.string(),
+  birthDate: z.date(),
+  birthPlace: z.string(),
+  nationality: z.string(),
+  civilStatus: z.string(),
+  linkedIn: z.string().url("Invalid LinkedIn URL").or(z.literal("")),
+  personalWebsite: z.string().url("Invalid personal website URL").or(z.literal("")),
 })
 
 export default function ContactDetailsForm({ resumeId }: { resumeId: number }) {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -74,8 +68,7 @@ export default function ContactDetailsForm({ resumeId }: { resumeId: number }) {
   useEffect(() => {
     async function fetchInitialData() {
       try {
-        const data: ContactDetails | null = await getContactDetails(resumeId);
-        
+        const data: ContactDetails | null = await getContactDetails(resumeId)
         if (data) {
           form.reset({
             firstName: data.firstName || "",
@@ -84,43 +77,55 @@ export default function ContactDetailsForm({ resumeId }: { resumeId: number }) {
             address: data.address || "",
             city: data.city || "",
             county: data.county || "",
-            birthDate: data.birthDate ? new Date(data.birthDate) : undefined, 
+            birthDate: data.birthDate ? new Date(data.birthDate) : undefined,
             birthPlace: data.birthPlace || "",
             nationality: data.nationality || "",
             civilStatus: data.civilStatus || "",
             linkedIn: data.linkedIn || "",
             personalWebsite: data.personalWebsite || "",
-          });
+          })
         }
       } catch (error) {
-        alert("Nu s-au putut încărca datele existente.");
+        toast.error("Failed to load data", {
+          description: "Your existing details could not be loaded. Please refresh the page.",
+        })
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
     }
 
-    fetchInitialData();
-  }, [resumeId, form]);
+    fetchInitialData()
+  }, [resumeId, form])
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const formData = new FormData(); 
-    Object.entries(values).forEach(([key, value]) => {
+    try {
+      const formData = new FormData()
+      Object.entries(values).forEach(([key, value]) => {
         if (value instanceof Date) {
-            formData.append(key, value.toISOString().split("T")[0]); 
+          formData.append(key, value.toISOString().split("T")[0])
         } else if (value !== null && value !== undefined) {
-            formData.append(key, value.toString());
+          formData.append(key, value.toString())
         }
-    }); 
+      })
 
-    await saveContactDetails(formData, resumeId);
+      await saveContactDetails(formData, resumeId)
+
+      toast.success("Details saved", {
+        description: "Your personal details have been updated successfully.",
+      })
+    } catch (error) {
+      toast.error("Save failed", {
+        description: "Something went wrong while saving. Please try again.",
+      })
+    }
   }
 
   if (isLoading) {
     return (
-        <div className="flex items-center justify-center min-h-screen bg-zinc-950">
-            <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
-        </div>
-    );
+      <div className="flex items-center justify-center min-h-screen bg-zinc-950">
+        <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+      </div>
+    )
   }
 
   return (
@@ -152,7 +157,6 @@ export default function ContactDetailsForm({ resumeId }: { resumeId: number }) {
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="lastName"
@@ -195,7 +199,6 @@ export default function ContactDetailsForm({ resumeId }: { resumeId: number }) {
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="county"
@@ -229,11 +232,11 @@ export default function ContactDetailsForm({ resumeId }: { resumeId: number }) {
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
                     <FormLabel className="text-zinc-300">Birth Date</FormLabel>
-                      <UpdatedDatePicker
-                        mode="start"
-                        value={field.value}
-                        onChange={field.onChange}
-                      />
+                    <UpdatedDatePicker
+                      mode="start"
+                      value={field.value}
+                      onChange={field.onChange}
+                    />
                     <FormMessage className="text-red-400" />
                   </FormItem>
                 )}
@@ -265,7 +268,6 @@ export default function ContactDetailsForm({ resumeId }: { resumeId: number }) {
                     </FormItem>
                   )}
                 />
-
                 <FormField
                   control={form.control}
                   name="civilStatus"
@@ -314,9 +316,9 @@ export default function ContactDetailsForm({ resumeId }: { resumeId: number }) {
                 className="w-full bg-violet-600 hover:bg-violet-700 text-white transition-colors"
               >
                 {form.formState.isSubmitting ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
+                  <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
-                    "Save Details"
+                  "Save Details"
                 )}
               </Button>
             </form>

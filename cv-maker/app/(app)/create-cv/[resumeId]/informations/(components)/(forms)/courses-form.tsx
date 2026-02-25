@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { BookOpen } from "lucide-react"
+import { toast } from "sonner"
 import { UpdatedDatePicker } from "@/components/ui/updated-date-picker"
 
 import {
@@ -17,7 +18,7 @@ import { Input } from "@/components/ui/input"
 import { SortableArraySection } from "../sortable-array-section"
 
 import { addCourses } from "../../actions"
-import { Course } from "@/types" 
+import { Course } from "@/types"
 
 interface CoursesFormProps {
   resumeId: number;
@@ -46,10 +47,18 @@ export default function CoursesForm({ resumeId, previousCourses }: CoursesFormPr
   });
 
   const onSubmit = async (data: z.infer<typeof courseSchema>) => {
-    const formData = new FormData();
-    formData.append("courses", JSON.stringify(data.courses));
-
-    await addCourses(formData, resumeId);
+    try {
+      const formData = new FormData();
+      formData.append("courses", JSON.stringify(data.courses));
+      await addCourses(formData, resumeId);
+      toast.success("Courses saved", {
+        description: "Your courses and certifications have been updated successfully.",
+      });
+    } catch (error) {
+      toast.error("Save failed", {
+        description: "Something went wrong while saving. Please try again.",
+      });
+    }
   }
 
   return (

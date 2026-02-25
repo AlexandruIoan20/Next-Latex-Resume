@@ -20,9 +20,9 @@ export default async function ContactDetailsPage({ params }: PageProps) {
     if(!verifyCV.success) redirect("/"); 
 
     return (
-        <>
+        <div className = "bg-zinc-950 min-h-screen">
             <ContactDetailsForm resumeId={resumeId} />
             <CVPagination linkRight = { `/create-cv/${resumeId}/informations` } />
-        </>
+        </div>
     );
 }

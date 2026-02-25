@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
 import { Star } from "lucide-react"
+import { toast } from "sonner"
 
 import {
   FormControl,
@@ -50,9 +51,18 @@ export default function AbilitiesForm({ resumeId, previousAbilities }: Abilities
   });
 
   const onSubmit = async (data: z.infer<typeof abilitySchema>) => {
-    const formData = new FormData();
-    formData.append("abilities", JSON.stringify(data.abilities));
-    await addAbilities(formData, resumeId);
+    try {
+      const formData = new FormData();
+      formData.append("abilities", JSON.stringify(data.abilities));
+      await addAbilities(formData, resumeId);
+      toast.success("Abilities saved", {
+        description: "Your skills and abilities have been updated successfully.",
+      });
+    } catch (error) {
+      toast.error("Save failed", {
+        description: "Something went wrong while saving. Please try again.",
+      });
+    }
   }
 
   const getLevelLabel = (levelValue: string) => {

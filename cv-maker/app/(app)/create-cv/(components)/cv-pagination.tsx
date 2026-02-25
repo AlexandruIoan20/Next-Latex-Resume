@@ -13,7 +13,9 @@ export default function CVPagination({ linkLeft, linkRight }: CVPaginationProps)
     const router = useRouter(); 
 
     return ( 
-        <div className="flex w-full items-center justify-center gap-5 mt-10 my-4 mx-auto pt-6 border-t border-zinc-800/50">
+        <div className="flex w-full items-center justify-center gap-5 py-4 px-4 
+                bottom-0 left-0 right-0 
+                border-t border-zinc-800/50 bg-zinc-950">
             <Button
                 variant="outline"
                 type = "button"
