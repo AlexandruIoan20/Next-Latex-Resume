@@ -6,6 +6,7 @@ import { nanoid } from "nanoid";
 import { getCurrentUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { User } from "@/types";
+import bcrypt from "bcrypt";
 
 export async function loginUser(formData: FormData) { 
     const currentUser = await getCurrentUser(); 
@@ -25,7 +26,9 @@ export async function loginUser(formData: FormData) {
         }
     }; 
 
-    if(user.password != password) { 
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    if(!isPasswordValid) { 
         return { 
             success: false, 
             message: "Incorrect password."
