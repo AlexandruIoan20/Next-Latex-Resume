@@ -13,7 +13,38 @@ export function GenerateClientPanel({ resumeId }: GenerateClientPanelProps) {
     const [isLoading, setIsLoading] = useState(false);
 
     const handleGenerateAction = async () => { 
+        setIsLoading(true); 
 
+        try { 
+            const response = await fetch(`/api/generate/${resumeId}`, { 
+                method: "GET"
+            }); 
+
+            if (!response.ok) {
+                throw new Error("A apărut o problemă la generarea CV-ului.");
+            }
+
+            const blob = await response.blob(); 
+            const url = window.URL.createObjectURL(blob); 
+
+            const a = document.createElement('a'); 
+            a.style.display = 'none'; 
+            a.href = url; 
+
+            a.download = `CV_${resumeId}.tex`; 
+            document.body.appendChild(a); 
+            
+            a.click(); 
+
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a); 
+            
+            console.log("DONE"); 
+        } catch(error) { 
+            console.log(error); 
+        } finally { 
+            setIsLoading(false); 
+        }
     }
 
     return (
