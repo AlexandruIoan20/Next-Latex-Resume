@@ -13,6 +13,19 @@ export const escapeLatex = (text: string | null | undefined): string => {
     .replace(/\^/g, "\\textasciicircum ");
 };
 
+const stripHtmlToPlainText = (html: string | null | undefined): string => {
+  if (!html) return "";
+  return html
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/<[^>]*>/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+};
+
 const processRichText = (html: string | null | undefined): string => {
   if (!html) return "";
   let text = html;
@@ -55,7 +68,7 @@ const processRichText = (html: string | null | undefined): string => {
 const formatDates = (start?: string | null, end?: string | null) => {
   if (!start) return "";
   const startStr = escapeLatex(start);
-  const endStr = end ? escapeLatex(end) : "Prezent";
+  const endStr = end ? escapeLatex(end) : "Present";
   return `${startStr} -- ${endStr}`;
 };
 
@@ -77,10 +90,32 @@ const formatBullets = (description: string | null | undefined): string => {
     let result = `\\resumeItemListStart\n`;
     lines.forEach((line) => {
       const cleanLine = line.replace(/<[^>]*>/g, "").trim();
-      if (cleanLine) {
+      if (!cleanLine) return;
+
+      // Detectăm dacă linia conține \textbf{...} în mijloc sau la final
+      // ex: "text normal \textbf{Activities:}" sau "\textbf{Activities:}"
+      const boldAtEndOrAlone = /(.*?)(\\textbf\{[^}]+\}:?\s*)$/.exec(cleanLine);
+
+      if (boldAtEndOrAlone && boldAtEndOrAlone[1].trim()) {
+        // Are text normal ÎNAINTE de bold → punem textul ca bullet normal
+        // și boldul ca subtitlu pe rând nou
+        const normalPart = boldAtEndOrAlone[1].trim();
+        const boldPart = boldAtEndOrAlone[2].trim();
+
+        result += `\\resumeItem{${normalPart}}\n`;
+        result += `\\resumeItemListEnd\n`;
+        result += `\\vspace{2pt}\\hspace{8pt}${boldPart}\\vspace{2pt}\n`;
+        result += `\\resumeItemListStart\n`;
+      } else if (/^\\textbf\{[^}]+\}:?\s*$/.test(cleanLine)) {
+        // E doar bold singur → subtitlu
+        result += `\\resumeItemListEnd\n`;
+        result += `\\vspace{2pt}\\hspace{8pt}${cleanLine}\\vspace{2pt}\n`;
+        result += `\\resumeItemListStart\n`;
+      } else {
         result += `\\resumeItem{${cleanLine}}\n`;
       }
     });
+
     result += `\\resumeItemListEnd\n`;
     return result;
   }
@@ -99,6 +134,7 @@ export const generateLatexCode = (data: any): string => {
     courses,
     languages,
     abilities,
+    interests,
   } = data;
 
   const preamble = `\\documentclass[letterpaper,11pt]{article}
@@ -163,7 +199,7 @@ export const generateLatexCode = (data: any): string => {
 \\newcommand{\\resumeProjectHeading}[2]{
     \\item
     \\begin{tabular*}{\\textwidth}{l@{\\extracolsep{\\fill}}r}
-      #1 & {\\color{dark-grey}} \\\\
+      #1 & {\\color{dark-grey}\\small #2} \\\\
     \\end{tabular*}\\vspace{-4pt}
 }
 \\newcommand{\\resumeCourseHeading}[3]{
@@ -187,9 +223,8 @@ export const generateLatexCode = (data: any): string => {
   // ── HEADER ──────────────────────────────────────────────────────────────────
   if (contactDetails) {
     tex += `\\begin{center}\n`;
-    tex += `\\textbf{\\Huge ${escapeLatex(contactDetails.firstName)} ${escapeLatex(contactDetails.lastName)}} \\\\ \\vspace{5pt}\n`;
+    tex += `\\textbf{\\Huge ${escapeLatex(contactDetails.lastName)} ${escapeLatex(contactDetails.firstName)}} \\\\ \\vspace{5pt}\n`;
 
-    // Rândul 1: linkuri (LinkedIn + Website) — afișate mare, clicabile
     const linkItems: string[] = [];
     if (contactDetails.linkedIn) {
       linkItems.push(
@@ -205,7 +240,6 @@ export const generateLatexCode = (data: any): string => {
       tex += linkItems.join(` \\hspace{8pt} `) + ` \\\\ \\vspace{3pt}\n`;
     }
 
-    // Rândul 2: telefon, email, oraș — info de contact
     const contactItems: string[] = [];
     if (contactDetails.phoneNumber) {
       contactItems.push(
@@ -248,17 +282,23 @@ export const generateLatexCode = (data: any): string => {
     tex += `\\section{${escapeLatex(resume.projectsTitle).toUpperCase()}}\n`;
     tex += `\\resumeSubHeadingListStart\n`;
     projects.forEach((proj: any) => {
-      const cleanTitle = processRichText(proj.title);
+      const cleanTitle = escapeLatex(stripHtmlToPlainText(proj.title));
       const cleanTechStack = proj.techStack
-        ? processRichText(proj.techStack)
+        ? escapeLatex(stripHtmlToPlainText(proj.techStack))
         : null;
 
+      // Titlu bold, urmat de " | TechStack italic" pe același rând
       let titleBlock = `\\textbf{${cleanTitle}}`;
       if (cleanTechStack) {
-        titleBlock += ` $|$ \\emph{${cleanTechStack}}`;
+        titleBlock += ` {\\color{dark-grey} $|$} \\emph{\\small ${cleanTechStack}}`;
       }
+
+      // Link clicabil pe titlu dacă există
       if (proj.link) {
-        titleBlock = `\\href{${escapeLatex(proj.link)}}{\\myuline{${titleBlock}}}`;
+        const linkPart = `\\href{${escapeLatex(proj.link)}}{\\myuline{\\textbf{${cleanTitle}}}}`;
+        titleBlock = cleanTechStack
+          ? `${linkPart} {\\color{dark-grey} $|$} \\emph{\\small ${cleanTechStack}}`
+          : linkPart;
       }
 
       tex += `\\resumeProjectHeading{${titleBlock}}{}\n`;
@@ -293,17 +333,51 @@ export const generateLatexCode = (data: any): string => {
   }
 
   // ── ABILITĂȚI ───────────────────────────────────────────────────────────────
-  if (abilities && abilities.length > 0) {
+    if (abilities && abilities.length > 0) {
     tex += `\\section{${escapeLatex(resume.abilitiesTitle).toUpperCase()}}\n`;
     tex += `\\begin{itemize}[leftmargin=0in, label={}]\n\\small{\\item{\n`;
-    const abilitiesStr = abilities
-      .map((a: any) => escapeLatex(a.title))
-      .join(", ");
-    tex += `\\textbf{${escapeLatex(resume.abilitiesTitle)}} {: ${abilitiesStr}}\n`;
+
+    // Împărțim abilitățile în coloane de câte 2
+    const cols = 2;
+    const rows = Math.ceil(abilities.length / cols);
+
+    tex += `\\begin{tabular*}{\\textwidth}{@{}p{0.46\\textwidth}@{\\hspace{20pt}}p{0.46\\textwidth}@{}}\n`;
+
+    for (let row = 0; row < rows; row++) {
+        const rowItems: string[] = [];
+
+        for (let col = 0; col < cols; col++) {
+        const idx = row * cols + col;
+        if (idx >= abilities.length) {
+            rowItems.push(""); 
+            continue;
+        }
+
+        const ability = abilities[idx];
+        const title = escapeLatex(ability.title);
+        const level = parseInt(ability.level ?? "0", 10);
+        const maxLevel = 6;
+
+        // Dots: ● filled, ○ empty
+        const filledDot = `{\\color{text-grey}$\\bullet$}`;
+        const emptyDot  = `{\\color{light-grey}$\\bullet$}`;
+
+        const dots = Array.from({ length: maxLevel }, (_, i) =>
+            i < level ? filledDot : emptyDot
+        ).join("\\,");
+
+        rowItems.push(`\\textbf{${title}} \\hfill ${dots}`);
+        }
+
+        tex += rowItems.join(" & ") + ` \\\\\[2pt]\n`;
+    }
+
+    tex += `\\end{tabular*}\n`;
     tex += `}}\n\\end{itemize}\n\n`;
-  }
+    }
 
   // ── LIMBI STRĂINE ───────────────────────────────────────────────────────────
+  // Format: English — B2   (nume bold, linie, nivel italic gri)
   if (languages && languages.length > 0) {
     tex += `\\section{${escapeLatex(resume.languagesTitle).toUpperCase()}}\n`;
     tex += `\\begin{itemize}[leftmargin=0in, label={}]\n\\small{\\item{\n`;
@@ -311,12 +385,23 @@ export const generateLatexCode = (data: any): string => {
     languages.forEach((l: any, index: number) => {
       const lang = escapeLatex(l.language);
       const level = escapeLatex(l.level);
-      // Nivel vizualizat ca text + dots grafice
-      tex += `\\textbf{${lang}} & \\textit{${level}}`;
-      if (index < languages.length - 1) tex += ` \\\\\n`;
+      tex += `\\textbf{${lang}} {\\color{light-grey}---} {\\color{dark-grey}\\textit{${level}}}`;
+      if (index < languages.length - 1) tex += ` \\\\\[3pt]\n`;
       else tex += `\n`;
     });
     tex += `\\end{tabular}\n`;
+    tex += `}}\n\\end{itemize}\n\n`;
+  }
+
+  // ── INTERESE ────────────────────────────────────────────────────────────────
+  // Format: pill-style tags separați prin bullet
+  if (interests && interests.length > 0) {
+    tex += `\\section{${escapeLatex(resume.interestsTitle).toUpperCase()}}\n`;
+    tex += `\\begin{itemize}[leftmargin=0in, label={}]\n\\small{\\item{\n`;
+    const interestsStr = interests
+      .map((i: any) => escapeLatex(i.title))
+      .join(" $\\cdot$ ");
+    tex += `${interestsStr}\n`;
     tex += `}}\n\\end{itemize}\n\n`;
   }
 

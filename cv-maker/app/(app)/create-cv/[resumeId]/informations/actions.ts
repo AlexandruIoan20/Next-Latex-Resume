@@ -288,7 +288,7 @@ export async function addProject(formData: FormData, resumeId: number) {
                     p.title, 
                     p.description, 
                     p.link, 
-                    p.description
+                    p.techStack, 
                 )   
             }
         }); 
